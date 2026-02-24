@@ -1,22 +1,34 @@
 export default async function handler(req, res) {
-    const BLOGGER_URL = "https://bsiw729rj38e9.blogspot.com"; // Your private source
+    // 1. YOUR PRIVATE BLOGGER URL
+    const BLOG_URL = "https://bsiw729rj38e9.blogspot.com"; 
+
+
     const { q, label, maxResults = 15 } = req.query;
 
-    // SECURITY: Only allow your own Vercel domain to call this API
+    // 2. Security: Verify request is from your own Vercel site
     const referer = req.headers.referer;
-    if (!referer || !referer.includes(process.env.VERCEL_URL || "localhost")) {
-        return res.status(403).json({ error: "Access denied" });
+    // During local development, referer might be localhost. 
+    // In production, process.env.VERCEL_URL is your domain.
+    if (!referer || (!referer.includes('vercel.app') && !referer.includes('localhost'))) {
+        return res.status(403).json({ error: "Access Denied" });
     }
 
-    let targetUrl = `${BLOGGER_URL}/feeds/posts/default?alt=json&max-results=${maxResults}`;
-    if (q) targetUrl += `&q=${encodeURIComponent(q)}`;
-    if (label) targetUrl = `${BLOGGER_URL}/feeds/posts/default/-/${encodeURIComponent(label)}?alt=json&max-results=${maxResults}`;
+    // 3. Construct the secret Blogger API URL
+    let bloggerUrl = `${BLOG_URL}/feeds/posts/default?alt=json&max-results=${maxResults}`;
+    
+    if (q) {
+        bloggerUrl += `&q=${encodeURIComponent(q)}`;
+    } else if (label) {
+        bloggerUrl = `${BLOG_URL}/feeds/posts/default/-/${encodeURIComponent(label)}?alt=json&max-results=${maxResults}`;
+    }
 
     try {
-        const response = await fetch(targetUrl);
+        const response = await fetch(bloggerUrl);
         const data = await response.json();
+        
+        // Return the data to your frontend
         res.status(200).json(data);
-    } catch (e) {
-        res.status(500).json({ error: "Failed to fetch data" });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch Blogger feed" });
     }
 }
