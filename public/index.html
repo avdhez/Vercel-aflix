@@ -89,7 +89,7 @@ a, button, [onclick], select, option {
 }
 
   body {  
-    background: var(--bg); color: #fff; font-family: 'Jost', serif;  
+    background: var(--bg); color: #fff; font-family: 'Aoboshi One', serif;  
     margin: 0; padding-top: 55px; overflow-x: hidden;  
     font-size: 13px; font-weight: 600; 
   }
@@ -230,7 +230,6 @@ $('#search-input').on('input', function() {
         
         searchTimer = setTimeout(() => {
             $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
-                // Strictly limit search results to 9 using client-side slicing
                 if (data && data.feed && data.feed.entry) {
                     const limitedEntries = data.feed.entry.slice(0, 9);
                     $('#search-results').html(limitedEntries.map(e => createCard(e)).join(''));
@@ -255,7 +254,6 @@ const observer = new IntersectionObserver((entries) => {
             let url = type === 'latest' ? `${config.feedApi}?max-results=15` : `${config.feedApi}?label=${lbl}&max-results=15`;
             
             $.getJSON(url, (data) => { 
-                // Strictly limit sliders to 15 items to prevent severe lagging
                 if(data && data.feed && data.feed.entry) {
                     const limitedEntries = data.feed.entry.slice(0, 15);
                     slider.innerHTML = limitedEntries.map(e => createCard(e)).join(''); 
