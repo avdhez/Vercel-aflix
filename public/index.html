@@ -122,8 +122,8 @@
                 </div>
             </div>
             <div class="toggle-group">
-                <button class="tgl-btn active" id="mode-watch">Watch</button>
-                <button class="tgl-btn" id="mode-dl">Download</button>
+                <button class="tgl-btn active" id="mode-watch" onclick="setMode('watch')">Watch</button>
+                <button class="tgl-btn" id="mode-dl" onclick="setMode('dl')">Download</button>
             </div>
             <div class="toggle-group" id="season-wrap" style="display:none; padding-top:0;">
                 <select id="season-select" onchange="updateEngine()" style="width:100%; padding:12px; background:#161616; color:#fff; border-radius:8px; border:1px solid #222; font-family:inherit; font-weight:700; text-transform: uppercase; outline: none;"></select>
@@ -136,13 +136,13 @@
     <script>
         const config = { 
             vercelApi: "https://tokenizer-wine.vercel.app/api/token", 
-            feedProxy: "/api/feed", // USE THE API WE CODED
+            feedProxy: "/api/feed", 
             newDomain: "147.135.213.131:20149", 
             newProtocol: "http:", 
             oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
         };
 
-        let linkStore = new Map(), currentId = "", searchTimer;
+        let currentMode = 'watch';
 
         /* --- AUTH ENGINE --- */
         (async function() {
@@ -182,7 +182,7 @@
         
         function createCard(e) {
             let t = getSmartThumb(e.media$thumbnail ? e.media$thumbnail.url : '');
-            return `<div class="thumb-card" onclick="openModal(\`${encodeURIComponent(e.content.$t)}\`, '${t}', \`${encodeURIComponent(e.title.$t)}\`, '', '${e.id.$t.split('post-')[1]}')">
+            return `<div class="thumb-card" onclick="openModal(\`${encodeURIComponent(e.content.$t)}\`, '${t}', \`${encodeURIComponent(e.title.$t)}\`)">
                         <img src="${t}" onload="this.parentElement.classList.remove('skeleton'); this.classList.add('loaded')"/>
                     </div>`;
         }
@@ -193,7 +193,6 @@
                     const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
                     slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
                     
-                    // FETCH FROM THE API PROXY
                     let url = type === 'latest' ? `${config.feedProxy}?maxResults=15` : `${config.feedProxy}?label=${lbl}&maxResults=15`;
                     $.getJSON(url, (data) => { if(data.feed.entry) slider.innerHTML = data.feed.entry.map(e => createCard(e)).join(''); });
                     observer.unobserve(entry.target);
@@ -202,7 +201,6 @@
         }, { threshold: 0.1 });
 
         $('#search-input').on('input', function() {
-            clearTimeout(searchTimer);
             let q = $(this).val();
             if(q.length > 2) {
                 $('#search-overlay').show(); $('body').addClass('search-open');
@@ -214,7 +212,7 @@
             }
         });
 
-        function openModal(encCont, thumb, encTitle, tags, id) {
+        function openModal(encCont, thumb, encTitle) {
             let fullTitle = decodeURIComponent(encTitle);
             let cont = decodeURIComponent(encCont), $html = $('<div>').append($.parseHTML(cont));
             
@@ -239,14 +237,22 @@
                 $html.find('button[onclick*="http"]').each(function() { movieGrid.append($(this).clone()); });
                 $('#links-engine').append(movieGrid);
             }
-            $('#post-modal').fadeIn(200); updateEngine();
+            $('#post-modal').fadeIn(200); 
+            updateEngine();
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            $('.tgl-btn').removeClass('active');
+            $(`#mode-${mode}`).addClass('active');
+            updateEngine();
         }
 
         function updateEngine() {
             $('.ep-grid').removeClass('active');
             let s = $('#season-select').val() || "1";
             $(`#s${s}`).addClass('active');
-            applyStreamLogic($('#mode-watch').hasClass('active'));
+            applyStreamLogic(currentMode === 'watch');
         }
 
         function applyStreamLogic(isVlc) {
