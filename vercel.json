@@ -1,13 +1,6 @@
 {
+  "version": 2,
   "rewrites": [
     { "source": "/api/feed", "destination": "/api/feed.js" }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://your-vercel-domain.vercel.app" }
-      ]
-    }
   ]
 }
