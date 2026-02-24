@@ -6,7 +6,7 @@
     <title>AFLIX - Premium Streaming</title>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&family=Aoboshi+One&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;800;900&family=Aoboshi+One&display=swap');
           
         :root {  
             --primary: #e50914;  
@@ -15,102 +15,103 @@
             --radius: 8px;
         }
 
-        /* --- SYSTEM --- */
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent !important; }
-        html, body { height: 100%; background: var(--bg); color: #fff; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 600; overflow-x: hidden; }
-        body { padding-top: 55px; -webkit-user-select: none; user-select: none; }
-        body.modal-open { overflow: hidden; }
-
-        /* --- AUTH & VISIBILITY --- */
-        #token-lock-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
-        nav, #home-wrap { opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
+        /* --- THE BLACK SCREEN FIX --- */
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
         
-        .verified #token-lock-overlay { opacity: 0; pointer-events: none; visibility: hidden; }
-        .verified nav, .verified #home-wrap { opacity: 1; pointer-events: auto; }
+        /* 1. Show background immediately */
+        html, body { background: var(--bg); color: #fff; font-family: 'Jost', sans-serif; height: 100%; overflow-x: hidden; }
+        body { padding-top: 60px; }
 
-        /* --- UI COMPONENTS --- */
+        /* 2. Hidden content state */
+        nav, #home-wrap { 
+            visibility: hidden; 
+            opacity: 0; 
+            transition: opacity 0.5s ease; 
+        }
+
+        /* 3. Verified state */
+        .verified nav, .verified #home-wrap { 
+            visibility: visible; 
+            opacity: 1; 
+        }
+
+        /* 4. Overlay logic: Visible by default so it's never "Nothing" */
+        #token-lock-overlay { 
+            position: fixed; inset: 0; background: #050505; z-index: 100000; 
+            display: flex; align-items: center; justify-content: center; 
+        }
+        .verified #token-lock-overlay { display: none !important; }
+
+        /* --- DESIGN UI --- */
         nav { position: fixed; top: 0; width: 100%; height: 60px; background: #000; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; }
-        .logo { color: var(--primary); font-size: 21px; font-weight: 900; letter-spacing: 2px; }
-        #search-input { background: rgba(255,255,255,0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+        .logo { color: var(--primary); font-size: 22px; font-weight: 900; letter-spacing: 2px; text-decoration: none; }
+        #search-input { background: var(--glass); border: 0; color: #fff; padding: 10px 15px; border-radius: var(--radius); width: 160px; outline: none; font-size: 12px; }
+
+        .section-container { padding: 10px 4%; }
+        .section-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .slider { display: flex; overflow-x: auto; gap: 12px; scrollbar-width: none; min-height: 160px; }
         
-        #search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4%; overflow-y: auto; }
-
-        .section-container { padding: 5px 4%; margin-bottom: 10px; }
-        .section-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        .slider { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; min-height: 150px; will-change: transform; }
-        .slider::-webkit-scrollbar { display: none; }
-
-        .thumb-card { flex: 0 0 auto; width: 100px; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass); background: #111; cursor: pointer; position: relative; }
-        .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.3s; }
+        .thumb-card { flex: 0 0 auto; width: 110px; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden; background: #111; border: 1px solid var(--glass); cursor: pointer; }
+        .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
         .thumb-card img.loaded { opacity: 1; }
 
         @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
         .skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-size: 800px 100%; animation: shimmer 1.5s infinite linear; }
 
         /* --- MODAL --- */
-        #post-modal { display: none; position: fixed; inset: 0; z-index: 10001; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-        .modal-content { max-width: 440px; width: 85%; margin: 4vh auto; background: #000; border-radius: var(--radius); max-height: 88vh; overflow-y: auto; border: 1px solid #222; position: relative; }
-        .close-x { position: fixed; top: 10px; right: 20px; font-size: 30px; color: #fff; cursor: pointer; z-index: 10011; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; font-family: 'Aoboshi One'; }
-        
-        .info-block { padding: 15px; display: flex; gap: 15px; background: linear-gradient(180deg, #111 0%, #000 100%); }
-        .m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; flex-shrink: 0; border: 1px solid #222; }
-        .m-title { font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; color: #fff; }
-        .m-desc { color: #888; font-size: 12px; line-height: 1.5; border-top: 1px solid #222; margin-top: 8px; padding-top: 8px; max-height: 80px; overflow-y: auto; }
+        #post-modal { display: none; position: fixed; inset: 0; z-index: 10001; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); }
+        .modal-content { max-width: 420px; width: 90%; margin: 5vh auto; background: #000; border-radius: 15px; border: 1px solid #222; position: relative; overflow: hidden; }
+        .close-x { position: absolute; top: 15px; right: 15px; font-size: 25px; color: #fff; cursor: pointer; z-index: 10; width: 40px; height: 40px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 
-        .toggle-group { display: flex; gap: 8px; padding: 10px 20px; }
-        .tgl-btn { flex: 1; padding: 12px; border-radius: var(--radius); border: 1px solid #222; background: #141414; color: #777; font-weight: 800; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+        .info-block { padding: 20px; display: flex; gap: 15px; }
+        .m-poster-box { width: 100px; height: 150px; border-radius: 10px; overflow: hidden; flex-shrink: 0; border: 1px solid #333; }
+        .m-title { font-size: 18px; font-weight: 900; margin-bottom: 5px; text-transform: uppercase; }
+        .m-desc { color: #888; font-size: 12px; line-height: 1.4; height: 60px; overflow-y: auto; margin-top: 10px; border-top: 1px solid #222; padding-top: 8px; }
+
+        .btn-group { display: flex; gap: 10px; padding: 10px 20px; }
+        .tgl-btn { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #111; color: #666; font-weight: 800; cursor: pointer; text-transform: uppercase; }
         .tgl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-        #links-engine { padding: 0 20px 20px; }
-        .ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .ep-grid.active { display: grid; }
-        .ep-grid button { text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 12px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; }
-        .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: 800; text-transform: uppercase; width: 100%; margin-top: 10px; cursor: pointer; font-family: inherit; }
+        
+        #links-engine { padding: 10px 20px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 10px; font-weight: 800; width: 100%; cursor: pointer; margin-top: 10px; text-transform: uppercase; font-family: inherit; }
     </style>
 </head>
 <body>
 
     <div id="token-lock-overlay">
-        <div style="background:#000; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:85%; text-align:center;">
+        <div style="background:#000; padding:40px 25px; border-radius:25px; border:1px solid #333; max-width:320px; width:85%; text-align:center;">
             <h2 style="color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;">Access Locked</h2>
-            <p style="color:#888; margin-bottom:20px; font-size: 12px;">Complete the link bypass to receive your 3-hour streaming token.</p>
+            <p style="color:#888; margin-bottom:20px; font-size: 13px;">Unlock your 3-hour access by getting a token.</p>
             <button class="gen-btn" id="main-gen-btn" onclick="startTokenGeneration()">Unlock Access</button>
-            <button class="gen-btn" style="background:#222; font-size: 11px;" onclick="window.open('https://zzlinkshh.blogspot.com/p/blog-page.html?m=1')">How To Unlock</button>
+            <button class="gen-btn" style="background:#222; font-size:11px;" onclick="window.open('https://zzlinkshh.blogspot.com/p/blog-page.html?m=1')">Tutorial</button>
         </div>
     </div>
 
     <nav>
         <a class="logo" href="/">AFLIX</a>
-        <input id="search-input" placeholder="SEARCH..." type="text">
+        <input id="search-input" placeholder="Search..." type="text">
     </nav>
 
-    <div id="search-overlay">
-        <div id="search-results" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px;"></div>
+    <div id="home-wrap">
+        <div class="section-container" data-type="latest"><div class="section-title">Recently Added</div><div class="slider"></div></div>
+        <div class="section-container" data-label="Action"><div class="section-title">Action</div><div class="slider"></div></div>
+        <div class="section-container" data-label="Romance"><div class="section-title">Romance</div><div class="slider"></div></div>
     </div>
-
-    <main id="home-wrap">
-        <section class="section-container" data-type="latest"><div class="section-title">Recently Added ☄️</div><div class="slider"></div></section>
-        <section class="section-container" data-label="Action"><div class="section-title">Action ⚔️</div><div class="slider"></div></section>
-        <section class="section-container" data-label="Romance"><div class="section-title">Romance ❤️</div><div class="slider"></div></section>
-    </main>
 
     <div id="post-modal">
         <span class="close-x" onclick="closeModal()">×</span>
         <div class="modal-content">
             <div class="info-block">
-                <div class="m-poster-box skeleton"><img id="m-poster"></div>
+                <div class="m-poster-box skeleton"><img id="m-poster" style="width:100%;height:100%;object-fit:cover;"></div>
                 <div class="m-summary-box">
                     <h2 class="m-title" id="m-title"></h2>
-                    <div style="font-size:11px; color:#aaa; text-transform:uppercase;"><b>Lang:</b> <span id="m-langs"></span> | <b>Subs:</b> <span id="m-subs"></span></div>
+                    <div id="m-meta" style="font-size:11px; color:var(--primary); font-weight:800;"></div>
                     <div class="m-desc" id="m-summary"></div> 
                 </div>
             </div>
-            <div class="toggle-group" id="mode-toggles">
-                <button class="tgl-btn active" data-mode="watch">Watch</button>
-                <button class="tgl-btn" data-mode="dl">Download</button>
-            </div>
-            <div class="toggle-group" id="season-wrap" style="display:none; padding-top:0;">
-                <select id="season-select" onchange="updateEngine()" style="width:100%; padding:12px; background:#161616; color:#fff; border-radius:8px; border:1px solid #222; font-weight:700; outline:none; text-transform:uppercase;"></select>
+            <div class="btn-group">
+                <button class="tgl-btn active" id="btn-watch">Watch</button>
+                <button class="tgl-btn" id="btn-dl">Download</button>
             </div>
             <div id="links-engine"></div>
         </div>
@@ -121,165 +122,111 @@
         const CONFIG = {
             tokenApi: "https://tokenizer-wine.vercel.app/api/token",
             feedApi: "/api/feed",
-            newBase: { host: "147.135.213.131", port: "20149", proto: "http:" },
-            oldHost: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app"
+            newDomain: "147.135.213.131:20149",
+            oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app"
         };
 
-        const linkStore = new Map();
-
-        /* --- AUTH ENGINE --- */
-        (async function initAuth() {
-            const params = new URLSearchParams(location.search);
-            const token = params.get('token');
+        /* --- AUTH ENGINE (FIXED) --- */
+        (async function checkAuth() {
+            const urlToken = new URLSearchParams(location.search).get('token');
             const expiry = localStorage.getItem('aflix_expiry');
 
+            // 1. Local Check (Instant)
             if (expiry && Date.now() < parseInt(expiry)) {
-                return $('html').addClass('verified');
+                return $('body').addClass('verified');
             }
 
-            if (token) {
+            // 2. URL Check
+            if (urlToken) {
                 try {
-                    const res = await fetch(`${CONFIG.tokenApi}?action=validate&token=${token}&burn=true`);
+                    const res = await fetch(`${CONFIG.tokenApi}?action=validate&token=${urlToken}&burn=true`);
                     const data = await res.json();
                     if (data.valid) {
                         localStorage.setItem('aflix_expiry', data.expiry);
-                        $('html').addClass('verified');
+                        $('body').addClass('verified');
                         history.replaceState({}, "", location.pathname);
                     }
-                } catch (e) { console.error("Auth Failed"); }
+                } catch (e) { console.log("Auth error"); }
             }
         })();
 
         async function startTokenGeneration() {
-            const btn = $('#main-gen-btn').text('Redirecting...').prop('disabled', true);
+            $('#main-gen-btn').text('Generating...').prop('disabled', true);
             try {
                 const res = await fetch(CONFIG.tokenApi);
                 const data = await res.json();
                 if (data.shortLink) location.href = data.shortLink;
-            } catch (e) { btn.text('Unlock Access').prop('disabled', false); }
+            } catch (e) { alert("API Offline"); $('#main-gen-btn').text('Unlock Access').prop('disabled', false); }
         }
 
         /* --- CONTENT ENGINE --- */
-        const getThumb = (url) => url ? url.replace(/\/s\d+(-c)?\//, '/w400/').replace(/=s\d+(-c)?/, '=w400') : '';
-
-        const createCard = (e) => {
-            const thumb = getThumb(e.media$thumbnail?.url);
-            const title = encodeURIComponent(e.title.$t);
-            const cont = encodeURIComponent(e.content.$t);
-            const id = e.id.$t.split('post-')[1];
-            return `<div class="thumb-card skeleton" onclick="openModal('${cont}', '${thumb}', '${title}', '${id}')">
-                        <img src="${thumb}" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
-                    </div>`;
-        };
-
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const el = entry.target, slider = el.querySelector('.slider');
-                    const label = el.dataset.label, type = el.dataset.type;
+                    const slider = entry.target.querySelector('.slider');
+                    const label = entry.target.dataset.label;
+                    const type = entry.target.dataset.type;
+                    
                     slider.innerHTML = Array(6).fill('<div class="thumb-card skeleton"></div>').join('');
                     
-                    const url = type === 'latest' ? `${CONFIG.feedApi}?maxResults=15` : `${CONFIG.feedApi}?label=${label}&maxResults=15`;
+                    let url = type === 'latest' ? `${CONFIG.feedApi}?maxResults=15` : `${CONFIG.feedApi}?label=${label}&maxResults=15`;
+                    
                     $.getJSON(url, data => {
-                        if (data.feed.entry) slider.innerHTML = data.feed.entry.map(createCard).join('');
+                        if (data.feed?.entry) {
+                            slider.innerHTML = data.feed.entry.map(e => {
+                                const thumb = e.media$thumbnail?.url.replace(/\/s\d+(-c)?\//, '/w400/') || '';
+                                return `<div class="thumb-card" onclick="openModal('${encodeURIComponent(JSON.stringify(e))}')">
+                                            <img src="${thumb}" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
+                                        </div>`;
+                            }).join('');
+                        }
                     });
-                    observer.unobserve(el);
+                    observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.1 });
+        });
 
-        /* --- MODAL LOGIC --- */
-        function openModal(encCont, thumb, encTitle, id) {
-            const title = decodeURIComponent(encTitle), cont = decodeURIComponent(encCont);
-            const $html = $('<div>').append($.parseHTML(cont));
+        function openModal(dataStr) {
+            const e = JSON.parse(decodeURIComponent(dataStr));
+            const $cont = $('<div>').append($.parseHTML(e.content.$t));
             
-            $('#m-poster').attr('src', thumb);
-            $('#m-title').text(title.split('[')[0]);
-            $('#m-summary').text($html.text().trim().slice(0, 180) + '...');
-            $('#m-langs').text((title.match(/\[(.*?)\]/) || ["","Multi"])[1]);
-            $('#m-subs').text(/ESubs/i.test(title) ? "Yes" : "No");
-
-            const $engine = $('#links-engine').empty(), $select = $('#season-select').empty();
-            $('#season-wrap').hide();
-
-            const episodes = $html.find('.episodes');
-            if (episodes.length) {
-                $('#season-wrap').show();
-                episodes.each((i, ep) => {
-                    const sNum = i + 1;
-                    $select.append(`<option value="${sNum}">Season ${sNum}</option>`);
-                    const grid = $('<div class="ep-grid">').attr('id', `s${sNum}`);
-                    $(ep).find('button').each((_, b) => grid.append($(b).clone()));
-                    $engine.append(grid);
-                });
-            } else {
-                const grid = $('<div class="ep-grid active">');
-                $html.find('button[onclick*="http"]').each((_, b) => {
-                    if (!/PLAY|DOWNLOAD/i.test($(b).text())) grid.append($(b).clone());
-                });
-                $engine.append(grid);
-            }
+            $('#m-title').text(e.title.$t.split('[')[0]);
+            $('#m-poster').attr('src', e.media$thumbnail?.url.replace(/\/s\d+(-c)?\//, '/w400/'));
+            $('#m-summary').text($cont.text().trim().slice(0, 150) + '...');
+            
+            const engine = $('#links-engine').empty();
+            $cont.find('button[onclick*="http"]').each(function() {
+                let btn = $(this).clone().attr('class', 'tgl-btn').css('color', '#fff');
+                engine.append(btn);
+            });
 
             $('#post-modal').fadeIn(200);
-            $('body').addClass('modal-open');
-            updateEngine();
+            applyLogic();
         }
 
-        // Optimized Event Delegation
-        $('#mode-toggles').on('click', '.tgl-btn', function() {
+        $(document).on('click', '.btn-group .tgl-btn', function() {
             $(this).addClass('active').siblings().removeClass('active');
-            updateEngine();
+            applyLogic();
         });
 
-        function updateEngine() {
-            $('.ep-grid').removeClass('active');
-            const s = $('#season-select').val() || "1";
-            $(`#s${s}`).addClass('active');
-            
-            const isWatch = $('#mode-toggles [data-mode="watch"]').hasClass('active');
-            const ua = navigator.userAgent.toLowerCase();
-
+        function applyLogic() {
+            const isWatch = $('#btn-watch').hasClass('active');
             $('#links-engine button').each(function() {
-                if (!linkStore.has(this)) linkStore.set(this, this.getAttribute('onclick'));
-                let link = (linkStore.get(this).match(/https?:\/\/[^\s'"]+/) || [])[0];
+                let onclick = $(this).attr('onclick');
+                let link = onclick.match(/https?:\/\/[^\s'"]+/)[0];
                 
-                if (link) {
-                    if (link.includes(CONFIG.oldHost)) {
-                        link = link.replace(CONFIG.oldHost, `${CONFIG.newBase.host}:${CONFIG.newBase.port}`);
-                    }
-                    if (isWatch) {
-                        if (/android/.test(ua)) {
-                            this.setAttribute('onclick', `location.href='intent://${link.replace(/^https?:\/\//,'')}#Intent;scheme=http;type=video/*;action=android.intent.action.VIEW;end'`);
-                        } else {
-                            this.setAttribute('onclick', `location.href='vlc://${link}'`);
-                        }
-                    } else {
-                        this.setAttribute('onclick', `window.open('${link}')`);
-                    }
+                if (link.includes(CONFIG.oldDomain)) link = link.replace(CONFIG.oldDomain, CONFIG.newDomain);
+                
+                if (isWatch) {
+                    $(this).attr('onclick', `location.href='vlc://${link.replace(/^https?:\/\//, "")}'`);
+                } else {
+                    $(this).attr('onclick', `window.open('${link}')`);
                 }
             });
         }
 
-        function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
-
-        $(document).ready(() => {
-            $('.section-container').each((_, s) => observer.observe(s));
-            
-            // Search logic
-            let sTimer;
-            $('#search-input').on('input', function() {
-                clearTimeout(sTimer);
-                const q = $(this).val();
-                if (q.length > 2) {
-                    $('#search-overlay').show();
-                    sTimer = setTimeout(() => {
-                        $.getJSON(`${CONFIG.feedApi}?q=${q}&maxResults=10`, data => {
-                            $('#search-results').html(data.feed.entry ? data.feed.entry.map(createCard).join('') : 'No results.');
-                        });
-                    }, 400);
-                } else if (!q) $('#search-overlay').hide();
-            });
-        });
+        function closeModal() { $('#post-modal').fadeOut(200); }
+        $(document).ready(() => $('.section-container').each((i, s) => observer.observe(s)));
     </script>
 </body>
 </html>
