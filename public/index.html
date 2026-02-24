@@ -14,7 +14,6 @@
             --bg: #050505;  
             --glass: rgba(255, 255, 255, 0.08);  
             --radius: 8px;
-            --poster-h: 140px;
         }
 
         /* --- SYSTEM & ANTI-FLICKER --- */
@@ -26,75 +25,78 @@
             margin:0; padding:0; box-sizing:border-box; 
         }
 
-        #token-lock-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: flex; align-items: center; justify-content: center; visibility: visible; }
-        .verified #token-lock-overlay { display: none !important; visibility: hidden !important; }
-        nav, #home-wrap { opacity: 0;}
-        .verified nav, .verified #home-wrap { opacity: 1; }
+        /* Elements are hidden until .verified class is added to <html> */
+        nav, #home-wrap { opacity: 0; pointer-events: none; transition: opacity 0.4s ease;}
+        .verified nav, .verified #home-wrap { opacity: 1; pointer-events: auto; }
 
-        html, body { height: 100%; margin: 0; padding: 0; background: var(--bg); color: #fff; font-family: 'Jost', serif; font-size: 13px; font-weight: 600; overflow-x: hidden; }
+        /* Lock Overlay is visible by default */
+        #token-lock-overlay { 
+            position: fixed; inset: 0; background: #050505; z-index: 100000; 
+            display: flex; align-items: center; justify-content: center; 
+            visibility: visible; opacity: 1;
+        }
+        .verified #token-lock-overlay { display: none !important; visibility: hidden !important; opacity: 0; }
+
+        html, body { height: 100%; background: var(--bg); color: #fff; font-family: 'Jost', serif; font-size: 13px; font-weight: 600; overflow-x: hidden; }
         body { padding-top: 55px; }
         body.search-open, body.modal-open { overflow: hidden !important; }
 
         a, button, [onclick] { pointer-events: auto !important; cursor: pointer !important; text-decoration: none; }
 
-        /* --- UI COMPONENTS --- */
+        /* --- UI --- */
         nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; box-sizing: border-box; }
         .logo { color: var(--primary); font-size: 21px; font-weight: 900; letter-spacing: 2px; }
-        #search-input { background: rgba(255, 255, 255, 0.1); border: 0px solid; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit; letter-spacing: 1px;}
+        #search-input { background: rgba(255, 255, 255, 0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit; letter-spacing: 1px;}
         
         #search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4%; box-sizing: border-box; overflow-y: auto; }
 
         @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
         .skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s infinite linear forwards; border-radius: var(--radius); }
 
-        #home-wrap { min-height: calc(100vh - 60px); height: auto; overflow: hidden; display: block; }
+        #home-wrap { min-height: calc(100vh - 60px); height: auto; display: block; }
         .section-container { padding: 2px 4%; margin-bottom: 2px; }
         .section-title { font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
         .slider { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; min-height: 150px; }
+        
         .thumb-card { flex: 0 0 auto; width: 100px; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass); background: #111; cursor: pointer; }
         .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
         .thumb-card img.loaded { opacity: 1; }
 
-        /* --- MODAL SYSTEM --- */
-        #post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(10px); }
-        .close-x { position: fixed; top: 8px; right: 30px; font-size: 28px; cursor: pointer; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; font-family:'Aoboshi One'; }
-        .modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); min-height:0vh; max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 1), 0 0 20px rgba(0,0,0,0.5); }
+        /* --- MODAL --- */
+        #post-modal { display: none; position: fixed; inset: 0; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(10px); }
+        .modal-content { max-width: 440px; width: 85%; margin: 3vh auto; background: black; border-radius: var(--radius); max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 1); }
+        .close-x { position: fixed; top: 8px; right: 20px; font-size: 28px; cursor: pointer; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; }
         
-        .info-block { padding: 15px; display: flex; gap: 18px; align-items: flex-start; background: linear-gradient(180deg, #111 0%, #000 100%); }
+        .info-block { padding: 15px; display: flex; gap: 18px; align-items: flex-start; }
         .m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; border: 1px solid #222; flex-shrink: 0; }
-        .m-poster-box img { width: 100%; height: 100%; object-fit: cover; }
-        .m-summary-box { flex-grow: 1; display: flex; flex-direction: column; height: 155px; overflow: hidden; }
-        .m-meta-item { font-size: 12px; margin-bottom: 2px; color: #ccc; text-transform: uppercase; font-weight: 800;}
-        .m-meta-item b { color: var(--primary); }
-        .m-title { font-size: 15px; line-height: 1.2; margin-bottom: 4px; font-weight: 800; color: #fff; text-transform: uppercase; }
-        .m-desc { color: #888; font-size: 13px; line-height: 1.4; font-weight: 600; overflow-y: auto; padding-right: 5px; flex-grow: 1; border-top: 1px solid #222; margin-top: 5px; }
+        .m-title { font-size: 15px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+        .m-desc { color: #888; font-size: 13px; line-height: 1.4; border-top: 1px solid #222; margin-top: 5px; padding-top: 5px; }
 
         .toggle-group { display: flex; gap: 8px; padding: 7px 20px; }
-        .tgl-btn { flex: 1; padding: 9px; border-radius: var(--radius); border: 1px solid #222; background: #141414; color: #777; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: inherit; }
+        .tgl-btn { flex: 1; padding: 10px; border-radius: var(--radius); border: 1px solid #222; background: #141414; color: #777; font-weight: 800; text-transform: uppercase; font-family: inherit; cursor: pointer; }
         .tgl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
         #links-engine { padding: 5px 20px 15px; }
-        .ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 187px; overflow-y: auto; }
+        .ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
         .ep-grid.active { display: grid; }
-        .ep-grid button { text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
-        .ep-grid button:last-child:nth-child(odd) { grid-column: 1 / span 2; }
-        .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: 100%; font-family: inherit; margin: 5px; }
+        .ep-grid button { text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; font-family: inherit; }
+        .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 10px; font-weight: 800; text-transform: uppercase; width: 100%; margin: 5px 0; font-family: inherit;}
     </style>
 </head>
 <body>
 
     <div id="token-lock-overlay">
-        <div style="background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:73%; text-align:center;">
+        <div style="background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:85%; text-align:center;">
             <h2 style="color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;">Restricted Access</h2>
-            <p style="color:#888; margin-bottom:20px;">Unlock your 3 hour Access to This Website. Bypass the link to get your token.</p>
+            <p style="color:#888; margin-bottom:20px;">Unlock your 3-hour access by bypassing the shortener link.</p>
             <button class="gen-btn" id="main-gen-btn" onclick="startTokenGeneration()">Unlock Access</button>
-            <button class="gen-btn" style="background: #222;" onclick="window.open('https://zzlinkshh.blogspot.com/p/blog-page.html?m=1')">How To Get Access</button>
+            <button class="gen-btn" style="background:#222;" onclick="window.open('https://zzlinkshh.blogspot.com/p/blog-page.html?m=1')">How To Get Access</button>
         </div>
     </div>
 
     <nav>
         <a class="logo" href="/">AFLIX</a>
-        <input id="search-input" placeholder="Search..." type="text"/>
+        <input id="search-input" placeholder="SEARCH..." type="text"/>
     </nav>
 
     <div id="search-overlay">
@@ -124,11 +126,7 @@
                 <button class="tgl-btn" id="mode-dl">Download</button>
             </div>
             <div class="toggle-group" id="season-wrap" style="display:none; padding-top:0;">
-                <select id="season-select" onchange="updateEngine()" style="width:100%; padding:12px; background:#161616; color:#fff; border-radius:8px; border:1px solid #222; outline: none; text-transform: uppercase; font-weight:700;"></select>
-            </div>
-            <div class="toggle-group" id="quality-wrap" style="display:none; padding-top:0;">
-                <button class="tgl-btn active" data-q="480p">480P</button>
-                <button class="tgl-btn" data-q="720p">720P</button>
+                <select id="season-select" onchange="updateEngine()" style="width:100%; padding:12px; background:#161616; color:#fff; border-radius:8px; border:1px solid #222; font-family:inherit; font-weight:700; text-transform: uppercase; outline: none;"></select>
             </div>
             <div id="links-engine"></div>
         </div>
@@ -138,6 +136,7 @@
     <script>
         const config = { 
             vercelApi: "https://tokenizer-wine.vercel.app/api/token", 
+            feedProxy: "/api/feed", // USE THE API WE CODED
             newDomain: "147.135.213.131:20149", 
             newProtocol: "http:", 
             oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
@@ -149,12 +148,10 @@
         (async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const urlToken = urlParams.get('token');
-            const savedToken = localStorage.getItem('aflix_access_token');
             const savedExpiry = localStorage.getItem('aflix_access_expiry');
 
-            if (savedToken && Date.now() < parseInt(savedExpiry)) {
-                document.documentElement.classList.add('verified');
-                if (urlToken) window.history.replaceState({}, document.title, window.location.pathname);
+            if (savedExpiry && Date.now() < parseInt(savedExpiry)) {
+                $('html').addClass('verified');
                 return;
             }
 
@@ -163,12 +160,9 @@
                     const res = await fetch(`${config.vercelApi}?action=validate&token=${urlToken}&burn=true`);
                     const data = await res.json();
                     if (data.valid) {
-                        localStorage.setItem('aflix_access_token', 'session_' + Date.now());
                         localStorage.setItem('aflix_access_expiry', data.expiry);
-                        document.documentElement.classList.add('verified');
+                        $('html').addClass('verified');
                         window.history.replaceState({}, document.title, window.location.pathname);
-                    } else {
-                        alert("Link expired or invalid.");
                     }
                 } catch (e) { console.log("Auth error"); }
             }
@@ -180,20 +174,16 @@
                 const res = await fetch(config.vercelApi);
                 const data = await res.json();
                 if (data.shortLink) window.location.href = data.shortLink;
-                else throw new Error();
-            } catch (e) { 
-                $('#main-gen-btn').text('Unlock Access').prop('disabled', false); 
-                alert("Connection failed."); 
-            }
+            } catch (e) { alert("API Offline"); $('#main-gen-btn').text('Unlock Access').prop('disabled', false); }
         }
 
-        /* --- LOGIC ENGINE --- */
+        /* --- CONTENT ENGINE --- */
         function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
         
         function createCard(e) {
             let t = getSmartThumb(e.media$thumbnail ? e.media$thumbnail.url : '');
-            return `<div class="thumb-card" onclick="openModal(\`${encodeURIComponent(e.content.$t)}\`, '${t}', \`${encodeURIComponent(e.title.$t)}\`, '${e.category ? e.category.map(c => c.term).join(',') : ''}', '${e.id.$t.split('post-')[1]}')">
-                        <img src="${t}" onload="this.parentElement.classList.remove('skeleton'); this.classList.add('loaded')" loading="lazy"/>
+            return `<div class="thumb-card" onclick="openModal(\`${encodeURIComponent(e.content.$t)}\`, '${t}', \`${encodeURIComponent(e.title.$t)}\`, '', '${e.id.$t.split('post-')[1]}')">
+                        <img src="${t}" onload="this.parentElement.classList.remove('skeleton'); this.classList.add('loaded')"/>
                     </div>`;
         }
 
@@ -203,8 +193,8 @@
                     const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
                     slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
                     
-                    // FETCH FROM YOUR VERCEL API PROXY
-                    let url = type === 'latest' ? `/api/feed?maxResults=15` : `/api/feed?label=${lbl}&maxResults=15`;
+                    // FETCH FROM THE API PROXY
+                    let url = type === 'latest' ? `${config.feedProxy}?maxResults=15` : `${config.feedProxy}?label=${lbl}&maxResults=15`;
                     $.getJSON(url, (data) => { if(data.feed.entry) slider.innerHTML = data.feed.entry.map(e => createCard(e)).join(''); });
                     observer.unobserve(entry.target);
                 }
@@ -216,104 +206,65 @@
             let q = $(this).val();
             if(q.length > 2) {
                 $('#search-overlay').show(); $('body').addClass('search-open');
-                searchTimer = setTimeout(() => {
-                    $.getJSON(`/api/feed?q=${q}&maxResults=9`, (data) => {
-                        $('#search-results').html(data.feed.entry ? data.feed.entry.map(e => createCard(e)).join('') : '<p style="padding:20px; color:#555">No results found.</p>');
-                    });
-                }, 400);
+                $.getJSON(`${config.feedProxy}?q=${q}&maxResults=9`, (data) => {
+                    $('#search-results').html(data.feed.entry ? data.feed.entry.map(e => createCard(e)).join('') : 'No results.');
+                });
             } else if(q.length === 0) {
                 $('#search-overlay').hide(); $('body').removeClass('search-open');
             }
         });
 
         function openModal(encCont, thumb, encTitle, tags, id) {
-            currentId = id;
             let fullTitle = decodeURIComponent(encTitle);
-            let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
-            let langsMatch = fullTitle.match(/\[(.*?)\]/);
-            let subsMatch = fullTitle.match(/ESubs/i) ? "Yes" : "No";
-            let rawLangs = langsMatch ? langsMatch[1] : "Multi";
-            
-            const langMap = { 'hindi': 'Hin', 'english': 'Eng', 'japanese': 'Jap', 'korean': 'Kor', 'tamil': 'Tam', 'telugu': 'Tel', 'chinese': 'Chi', 'spanish': 'Spa','indonesian':'Ido', 'french': 'Fre','german':'Ger' };
-            let codes = rawLangs.split(/\s*\+\s*|\s*,\s*|\s*\|\s*/).map(l => { let clean = l.trim().toLowerCase(); return langMap[clean] || (l.length > 3 ? l.substring(0,3) : l); }).join(' + ');
-
             let cont = decodeURIComponent(encCont), $html = $('<div>').append($.parseHTML(cont));
-            let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
-            
-            $html.find('h2,button, a, script, style,option,select').remove();
             
             $('#m-poster-wrap').addClass('skeleton'); 
             $('#m-poster').attr('src', thumb); 
-            $('#m-title').text(name); 
-            $('#m-langs').text(codes); 
-            $('#m-subs').text(subsMatch); 
-            $('#m-summary').text($html.text().replace(/\s+/g, ' ').trim());
+            $('#m-title').text(fullTitle.split('[')[0]); 
+            $('#m-summary').text($html.text().trim().substring(0, 200) + '...');
             
-            $('#links-engine, #season-select').empty(); $('#season-wrap, #quality-wrap').hide();
+            $('#links-engine, #season-select').empty(); $('#season-wrap').hide();
 
-            let $data = $('<div>').append($.parseHTML(cont)), episodes = $data.find('.episodes');
+            let episodes = $html.find('.episodes');
             if(episodes.length > 0) {
                 $('#season-wrap').show();
                 episodes.each(function(i) {
-                    let sNum = i + 1, displayLabel = seasonNames[i] ? seasonNames[i] : `Season ${sNum}`;
-                    $('#season-select').append(`<option value="${sNum}">${displayLabel}</option>`);
-                    if($(this).find('#480p, #720p').length > 0) {
-                        $('#quality-wrap').show();
-                        ['480p', '720p'].forEach(q => {
-                            let grid = $('<div class="ep-grid"></div>').attr('id', `s${sNum}-${q}`);
-                            $(this).find(`#${q} button`).each(function() { grid.append($(this).clone()); });
-                            $('#links-engine').append(grid);
-                        });
-                    } else {
-                        let grid = $('<div class="ep-grid"></div>').attr('id', `s${sNum}-single`);
-                        $(this).find('button').each(function() { grid.append($(this).clone()); });
-                        $('#links-engine').append(grid);
-                    }
+                    $('#season-select').append(`<option value="${i+1}">Season ${i+1}</option>`);
+                    let grid = $('<div class="ep-grid"></div>').attr('id', `s${i+1}`);
+                    $(this).find('button').each(function() { grid.append($(this).clone()); });
+                    $('#links-engine').append(grid);
                 });
             } else {
                 let movieGrid = $('<div class="ep-grid active"></div>');
-                $data.find('button[onclick*="http"]').each(function() { if(!$(this).text().match(/PLAY|DOWNLOAD/i)) movieGrid.append($(this).clone()); });
+                $html.find('button[onclick*="http"]').each(function() { movieGrid.append($(this).clone()); });
                 $('#links-engine').append(movieGrid);
             }
-            $('#post-modal').fadeIn(200); $('body').addClass('modal-open');
-            updateEngine();
+            $('#post-modal').fadeIn(200); updateEngine();
         }
 
-        $(document).on('click', '.toggle-group .tgl-btn', function() { $(this).siblings().removeClass('active'); $(this).addClass('active'); updateEngine(); });
-        
         function updateEngine() {
-            if($('#season-wrap').is(':visible')) {
-                $('.ep-grid').removeClass('active');
-                let s = $('#season-select').val(), q = $('#quality-wrap .tgl-btn.active').data('q');
-                let target = $(`#s${s}-single`).length ? `#s${s}-single` : `#s${s}-${q}`;
-                $(target).addClass('active');
-            }
+            $('.ep-grid').removeClass('active');
+            let s = $('#season-select').val() || "1";
+            $(`#s${s}`).addClass('active');
             applyStreamLogic($('#mode-watch').hasClass('active'));
         }
 
         function applyStreamLogic(isVlc) {
-            const ua = navigator.userAgent.toLowerCase();
-            const isAnd = /android/.test(ua), isIos = /iphone|ipad|ipod/.test(ua);
             document.querySelectorAll('#links-engine button').forEach(btn => {
-                if(!linkStore.has(btn)) linkStore.set(btn, btn.getAttribute('onclick'));
-                let originalOnclick = linkStore.get(btn);
+                let originalOnclick = btn.getAttribute('onclick');
                 let m = originalOnclick.match(/https?:\/\/[^\s'"]+/);
                 if(m) {
                     let targetUrl = m[0];
                     if (targetUrl.includes(config.oldDomain)) {
-                        let u = new URL(targetUrl); u.hostname = config.newDomain.split(':')[0]; u.port = config.newDomain.split(':')[1] || ""; u.protocol = config.newProtocol;
-                        targetUrl = u.toString();
+                        targetUrl = targetUrl.replace(config.oldDomain, config.newDomain);
                     }
-                    if (isVlc) {
-                        if (isAnd) btn.setAttribute('onclick', `window.location.href='intent://${targetUrl.replace(/^https?:\/\//,'')}#Intent;scheme=http;type=video/*;action=android.intent.action.VIEW;end'`);
-                        else if (isIos) btn.setAttribute('onclick', `window.location.href='vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(targetUrl)}'`);
-                        else btn.setAttribute('onclick', `window.location.href='vlc://${targetUrl}'`);
-                    } else { btn.setAttribute('onclick', `window.open('${targetUrl}')`); }
+                    if (isVlc) btn.setAttribute('onclick', `window.location.href='vlc://${targetUrl}'`);
+                    else btn.setAttribute('onclick', `window.open('${targetUrl}')`);
                 }
             });
         }
 
-        function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
+        function closeModal() { $('#post-modal').fadeOut(200); }
         $(document).ready(() => { $('.section-container').each(function() { observer.observe(this); }); });
     </script>
 </body>
