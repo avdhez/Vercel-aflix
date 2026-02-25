@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<meta charset="UTF-8" />
+<meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'/>
+<title>AFLIX - Premium Streaming</title>
+
+<script type='text/javascript'>
+// <![CDATA[
+const config = { 
+    vercelApi: "https://tokenizer-wine.vercel.app/api/token", 
+    feedApi: "/api/feed", 
+    newDomain: "147.135.213.131:20149", 
+    newProtocol: "http:", 
+    oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
+};
+
+/* --- AUTHENTICATION ENGINE --- */
+(async function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token');
+    const savedToken = localStorage.getItem('aflix_access_token');
+    const savedExpiry = localStorage.getItem('aflix_access_expiry');
+
+    if (savedToken && Date.now() < parseInt(savedExpiry)) {
+        document.documentElement.classList.add('verified');
+        if (urlToken) window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+    }
+
+    if (urlToken) {
+        try {
+            const res = await fetch(`${config.vercelApi}?action=validate&token=${urlToken}&burn=true`);
+            const data = await res.json();
+            if (data.valid) {
+                localStorage.setItem('aflix_access_token', 'session_' + Date.now());
+                localStorage.setItem('aflix_access_expiry', data.expiry);
+                document.documentElement.classList.add('verified');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                alert("Link expired or invalid. Please generate a new one.");
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        } catch (e) { console.log("Auth error"); }
+    }
+})();
+// ]]>
+</script>
+
+<style>
+/* Anti-Flicker CSS */
+#token-lock-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: flex; align-items: center; justify-content: center; visibility: visible; }
+.verified #token-lock-overlay { display: none !important; visibility: hidden !important; }
+nav, #home-wrap { opacity: 0;}
+.verified nav, .verified #home-wrap { opacity: 1; }
+
+/* FIX: Scrolling issue - home-wrap height control */
+#home-wrap { min-height: calc(100vh - 60px); height: auto; overflow: hidden; display: block; }
+html, body { height: 100%; margin: 0; padding: 0; }
+
+@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aoboshi+One&display=swap');
+  
+  :root {  
+    --primary: #e50914;  
+    --bg: #050505;  
+    --glass: rgba(255, 255, 255, 0.08);  
+    --radius: 8px;
+    --poster-h: 140px;
+  }
+  
+/* --- SYSTEM --- */
+
+* {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    -webkit-user-drag: none !important;
+    -webkit-tap-highlight-color: transparent !important;margin:0; padding:0; box-sizing:border-box; 
+}
+
+/* But allow clicks on links and buttons */
+a, button, [onclick], select, option {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+  body {  
+    background: var(--bg); color: #fff; font-family: 'Jost', sans-serif;  
+    margin: 0; padding-top: 55px; overflow-x: hidden;  
+    font-size: 13px; font-weight: 600; 
+  }
+  body.search-open, body.modal-open { overflow: hidden !important; }
+
+  nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; box-sizing: border-box; }
+  .logo { color: var(--primary); font-size: 21px; font-weight: 900; text-decoration: none; letter-spacing: 2px; }
+  #search-input { background: rgba(255, 255, 255, 0.1); border: 0px solid; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit;letter-spacing: 1px;}
+  #search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4% 20px; box-sizing: border-box; overflow-y: auto; }
+
+  @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+  .skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s infinite linear forwards; border-radius: var(--radius); }
+
+  .section-container { padding: 2px 4%; margin-bottom: 2px; }
+  .section-title { font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
+  .slider { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; min-height: 150px; }
+  .thumb-card { flex: 0 0 auto; width: 100px; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass); background: #111; cursor: pointer; }
+  .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
+  .thumb-card img.loaded { opacity: 1; }
+
+  #post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(10px); }
+  .close-x { position: fixed; top: 8px; right: 30px; font-size: 28px; cursor: pointer; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); min-height:0vh; max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 1), 0 0 20px rgba(0,0,0,0.5); }
+  .info-block { padding: 15px; display: flex; gap: 18px; align-items: flex-start; background: linear-gradient(180deg, #111 0%, #000 100%); }
+  .m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; border: 1px solid #222; flex-shrink: 0; }
+  .m-poster-box img { width: 100%; height: 100%; object-fit: cover; }
+  .m-summary-box { flex-grow: 1; display: flex; flex-direction: column; height: 155px; overflow: hidden; }
+  .m-meta-item { font-size: 12px; margin-bottom: 2px; color: #ccc; text-transform: uppercase; font-weight: 800;}
+  .m-meta-item b { color: var(--primary); }
+  .m-title { font-size: 15px; line-height: 1.2; margin-bottom: 4px; font-weight: 800; color: #fff; text-transform: uppercase; }
+  .m-desc { color: #888; font-size: 13px; line-height: 1.4; font-weight: 600; overflow-y: auto; padding-right: 5px; flex-grow: 1; border-top: 1px solid #222; margin-top: 5px; }
+
+  .toggle-group { display: flex; gap: 8px; padding: 7px 20px; }
+  .tgl-btn { flex: 1; padding: 9px; border-radius: var(--radius); border: 1px solid #222; background: #141414; color: #777; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: inherit; }
+  .tgl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  #links-engine { padding: 5px 20px 15px; }
+  .ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 187px; overflow-y: auto; }
+  .ep-grid.active { display: grid; }
+  .ep-grid button:last-child:nth-child(odd) { grid-column: 1 / span 2; }
+  .ep-grid button {text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: 100%; font-family: inherit;margin: 5px; }
+</style>
+</head>
+
+<body id='main-body'>
+  <div id='token-lock-overlay'>
+    <div style='background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:73%; text-align:center;'>
+      <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;'>Restricted Access</h2>
+      <p style='color:#888; margin-bottom:20px;'>Unlock your 3 hour Access to This Website. To Get Access You Need To Bypass The Shortner link And Get the link with Access Token </p>
+      <button class='gen-btn' id='main-gen-btn' onclick='startTokenGeneration()'>Unlock Access</button>
+      <button class='gen-btn' onclick='window.open("https://zzlinkshh.blogspot.com/p/blog-page.html?m=1")'>How To Get Access</button>
+    </div>
+  </div>
+
+  <nav>
+    <a class='logo' href='/'>AFLIX</a>
+    <input id='search-input' placeholder='Search...' type='text'/>
+  </nav>
+
+  <div id='search-overlay'>
+    <div class='grid-layout' id='search-results' style='display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px;'></div>
+  </div>
+
+  <div id='home-wrap'>
+    <div class='section-container' data-type='latest'><div class='section-title'>Recently Added &#9732;</div><div class='slider'></div></div>
+    
+   <div class='section-container' data-label='Action'><div class='section-title'>Action &#9773;</div><div class='slider'></div></div>
+    
+    <div class='section-container' data-label='Romance'><div class='section-title'>Romance &#10084;&#65038;</div><div class='slider'></div></div>
+  </div>
+
+  <div id='post-modal'>
+    <span class='close-x' onclick='closeModal()'>&#215;</span>
+    <div class='modal-content'>
+      <div class='info-block'>
+        <div class='m-poster-box skeleton' id='m-poster-wrap'><img id='m-poster' src=''/></div>
+        <div class='m-summary-box'>
+          <div class='m-title' id='m-title'></div>
+          <div class='m-meta-item'><b>Lang:</b> <span id='m-langs'>-</span></div>
+          <div class='m-meta-item'><b>Subs:</b> <span id='m-subs'>None</span></div>
+          <div class='m-desc' id='m-summary'></div> 
+        </div>
+      </div>
+      <div class='toggle-group'>
+        <button class='tgl-btn active' id='mode-watch'>Watch</button>
+        <button class='tgl-btn' id='mode-dl'>Download</button>
+      </div>
+      <div class='toggle-group' id='season-wrap' style='display:none; padding-top:0;'>
+        <select id='season-select' onchange='updateEngine()' style='width:100%; padding:12px; background:#161616; color:#fff; border-radius:8px; border:1px solid #222; font-family:inherit; font-weight:700;text-transform: uppercase;outline: none;'></select>
+      </div>
+      <div class='toggle-group' id='quality-wrap' style='display:none; padding-top:0;'>
+        <button class='tgl-btn active' data-q='480p'>480P</button>
+        <button class='tgl-btn' data-q='720p'>720P</button>
+      </div>
+      <div id='links-engine'></div>
+    </div>
+  </div>
+
+<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+<script type='text/javascript'>
+// <![CDATA[
+let linkStore = new Map(), currentId = "", searchTimer;
+
+async function startTokenGeneration() {
+    $('#main-gen-btn').text('Redirecting...').prop('disabled', true);
+    try {
+        const res = await fetch(config.vercelApi);
+        const data = await res.json();
+        if (data.shortLink) {
+            window.location.href = data.shortLink;
+        } else {
+            alert("API response error.");
+            $('#main-gen-btn').text('Unlock Access').prop('disabled', false);
+        }
+    } catch (e) { 
+        $('#main-gen-btn').text('Unlock Access').prop('disabled', false); 
+        alert("Connection failed.");
+    }
+}
+
+function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
+function createCard(e) {
+    let t = getSmartThumb(e.media$thumbnail ? e.media$thumbnail.url : '');
+    return `<div class="thumb-card" onclick="openModal(\`${encodeURIComponent(e.content.$t)}\`, '${t}', \`${encodeURIComponent(e.title.$t)}\`, '${e.category ? e.category.map(c => c.term).join(',') : ''}', '${e.id.$t.split('post-')[1]}')">
+                <img src="${t}" onload="this.parentElement.classList.remove('skeleton'); this.classList.add('loaded')" loading="lazy"/>
+            </div>`;
+}
+
+$('#search-input').on('input', function() {
+    clearTimeout(searchTimer);
+    let q = $(this).val();
+    
+    if(q.length > 2) {
+        $('#search-overlay').show(); 
+        $('body').addClass('search-open');
+        $('#search-results').html(Array(9).fill('<div class="thumb-card skeleton"></div>').join(''));
+        
+        searchTimer = setTimeout(() => {
+            $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
+                if (data && data.feed && data.feed.entry) {
+                    const limitedEntries = data.feed.entry.slice(0, 9);
+                    $('#search-results').html(limitedEntries.map(e => createCard(e)).join(''));
+                } else {
+                    $('#search-results').html('<p style="padding:20px; color:#555">No results found.</p>');
+                }
+            });
+        }, 400);
+    } else if(q.length === 0) {
+        $('#search-overlay').hide();
+        $('body').removeClass('search-open');
+        $('#search-results').empty();
+    }
+});
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if(entry.isIntersecting) {
+            const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
+            slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
+            
+            let url = type === 'latest' ? `${config.feedApi}?max-results=15` : `${config.feedApi}?label=${lbl}&max-results=15`;
+            
+            $.getJSON(url, (data) => { 
+                if(data && data.feed && data.feed.entry) {
+                    const limitedEntries = data.feed.entry.slice(0, 15);
+                    slider.innerHTML = limitedEntries.map(e => createCard(e)).join(''); 
+                }
+            });
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
+
+function openModal(encCont, thumb, encTitle, tags, id) {
+    currentId = id;
+    let fullTitle = decodeURIComponent(encTitle);
+    let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
+    let langsMatch = fullTitle.match(/\[(.*?)\]/);
+    let subsMatch = fullTitle.match(/ESubs/i);
+    let rawLangs = langsMatch ? langsMatch[1] : "Multi";
+    const langMap = { 'hindi': 'Hin', 'english': 'Eng', 'japanese': 'Jap', 'korean': 'Kor', 'tamil': 'Tam', 'telugu': 'Tel', 'chinese': 'Chi', 'spanish': 'Spa','indonesian':'Ido', 'french': 'Fre','german':'Ger' };
+    let codes = rawLangs.split(/\s*\+\s*|\s*,\s*|\s*\|\s*/).map(l => { let clean = l.trim().toLowerCase(); return langMap[clean] || (l.length > 3 ? l.substring(0,3) : l); }).join(' + ');
+    let subs = subsMatch ? "Yes" : "No";
+    let cont = decodeURIComponent(encCont), $html = $('<div>').append($.parseHTML(cont));
+    let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
+    $html.find('h2,button, a, script, style,option,select').remove();
+    let cleanText = $html.text().replace(/\s+/g, ' ').trim();
+    $('#m-poster-wrap').addClass('skeleton'); $('#m-poster').attr('src', thumb); $('#m-title').text(name); $('#m-langs').text(codes); $('#m-subs').text(subs); $('#m-summary').text(cleanText);
+    $('#links-engine, #season-select').empty(); $('#season-wrap, #quality-wrap').hide();
+    let $data = $('<div>').append($.parseHTML(cont)), episodes = $data.find('.episodes');
+    if(episodes.length > 0) {
+        $('#season-wrap').show();
+        episodes.each(function(i) {
+            let sNum = i + 1, displayLabel = seasonNames[i] ? seasonNames[i] : `Season ${sNum}`;
+            $('#season-select').append(`<option value="${sNum}">${displayLabel}</option>`);
+            if($(this).find('#480p, #720p').length > 0) {
+                $('#quality-wrap').show();
+                ['480p', '720p'].forEach(q => {
+                    let grid = $('<div class="ep-grid"></div>').attr('id', `s${sNum}-${q}`);
+                    $(this).find(`#${q} button`).each(function() { grid.append($(this).clone()); });
+                    $('#links-engine').append(grid);
+                });
+            } else {
+                let grid = $('<div class="ep-grid"></div>').attr('id', `s${sNum}-single`);
+                $(this).find('button').each(function() { grid.append($(this).clone()); });
+                $('#links-engine').append(grid);
+            }
+        });
+    } else {
+        let movieGrid = $('<div class="ep-grid active"></div>');
+        $data.find('button[onclick*="http"]').each(function() { if(!$(this).text().match(/PLAY|DOWNLOAD/i)) movieGrid.append($(this).clone()); });
+        $('#links-engine').append(movieGrid);
+    }
+    $('#post-modal').fadeIn(200); $('body').addClass('modal-open');
+    updateEngine();
+}
+
+$(document).on('click', '.toggle-group .tgl-btn', function() { $(this).siblings().removeClass('active'); $(this).addClass('active'); updateEngine(); });
+function updateEngine() {
+    if($('#season-wrap').is(':visible')) {
+        $('.ep-grid').removeClass('active');
+        let s = $('#season-select').val(), q = $('#quality-wrap .tgl-btn.active').data('q');
+        let target = $(`#s${s}-single`).length ? `#s${s}-single` : `#s${s}-${q}`;
+        $(target).addClass('active');
+    }
+    applyStreamLogic($('#mode-watch').hasClass('active'));
+}
+
+function applyStreamLogic(isVlc) {
+    const ua = navigator.userAgent.toLowerCase();
+    const isAnd = /android/.test(ua), isIos = /iphone|ipad|ipod/.test(ua);
+    document.querySelectorAll('#links-engine button').forEach(btn => {
+        if(!linkStore.has(btn)) linkStore.set(btn, btn.getAttribute('onclick'));
+        let originalOnclick = linkStore.get(btn);
+        let m = originalOnclick.match(/https?:\/\/[^\s'"]+/);
+        if(m) {
+            let targetUrl = m[0];
+            if (targetUrl.includes(config.oldDomain)) {
+                let u = new URL(targetUrl); u.hostname = config.newDomain.split(':')[0]; u.port = config.newDomain.split(':')[1] || ""; u.protocol = config.newProtocol;
+                targetUrl = u.toString();
+            }
+            if (isVlc) {
+                if (isAnd) btn.setAttribute('onclick', `window.location.href='intent://${targetUrl.replace(/^https?:\/\//,'')}#Intent;scheme=http;type=video/*;action=android.intent.action.VIEW;end'`);
+                else if (isIos) btn.setAttribute('onclick', `window.location.href='vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(targetUrl)}'`);
+                else btn.setAttribute('onclick', `window.location.href='vlc://${targetUrl}'`);
+            } else { btn.setAttribute('onclick', `window.open('${targetUrl}')`); }
+        }
+    });
+}
+function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
+$(document).ready(() => { $('.section-container').each(function() { observer.observe(this); }); });
+// ]]>
+</script>
+</body>
+</html>
