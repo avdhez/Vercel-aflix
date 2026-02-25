@@ -16,7 +16,6 @@
 #popup2004-timer { color: #fff; font-weight: 800; margin: 10px 0; display: block; font-size: 16px; }
 #popup2004-message { color: #e50914; font-size: 16px; margin-top: 10px; display: none; font-weight: 800; }
 
-/* --- CONTENT HIDDEN UNTIL ACCESS --- */
 #home-wrap { display: none; }
 
 :root { --primary: #e50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.08); --radius: 8px; }
@@ -58,9 +57,12 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 .tgl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
 #links-engine { padding: 5px 20px 15px; }
+/* --- ODD BUTTON LOGIC CSS --- */
 .ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 187px; overflow-y: auto; }
 .ep-grid.active { display: grid; }
 .ep-grid button { text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.ep-grid button:last-child:nth-child(odd) { grid-column: span 2; } /* Makes the last button full-width if odd */
+
 .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: 100%; font-family: inherit; margin: 5px; }
 </style>
 </head>
@@ -183,7 +185,7 @@ var popup2004 = {
 };
 
 // <![CDATA[
-/* --- EXACT ORIGINAL LOGICS --- */
+/* --- YOUR EXACT ORIGINAL LOGICS --- */
 let linkStore = new Map(), currentId = "", searchTimer;
 
 function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
@@ -197,9 +199,12 @@ function createCard(e) {
 $('#search-input').on('input', function() {
     clearTimeout(searchTimer);
     let q = $(this).val();
+
     if(q.length > 2) {
-        $('#search-overlay').show(); $('body').addClass('search-open');
+        $('#search-overlay').show(); 
+        $('body').addClass('search-open');
         $('#search-results').html(Array(9).fill('<div class="thumb-card skeleton"></div>').join(''));
+
         searchTimer = setTimeout(() => {
             $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
                 if (data && data.feed && data.feed.entry) {
@@ -211,7 +216,9 @@ $('#search-input').on('input', function() {
             });
         }, 400);
     } else if(q.length === 0) {
-        $('#search-overlay').hide(); $('body').removeClass('search-open'); $('#search-results').empty();
+        $('#search-overlay').hide();
+        $('body').removeClass('search-open');
+        $('#search-results').empty();
     }
 });
 
@@ -220,7 +227,9 @@ const observer = new IntersectionObserver((entries) => {
         if(entry.isIntersecting) {
             const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
             slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
+
             let url = type === 'latest' ? `${config.feedApi}?max-results=15` : `${config.feedApi}?label=${lbl}&max-results=15`;
+
             $.getJSON(url, (data) => { 
                 if(data && data.feed && data.feed.entry) {
                     const limitedEntries = data.feed.entry.slice(0, 15);
@@ -236,7 +245,8 @@ function openModal(encCont, thumb, encTitle, tags, id) {
     currentId = id;
     let fullTitle = decodeURIComponent(encTitle);
     let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
-    let langsMatch = fullTitle.match(/\[(.*?)\]/), subsMatch = fullTitle.match(/ESubs/i);
+    let langsMatch = fullTitle.match(/\[(.*?)\]/);
+    let subsMatch = fullTitle.match(/ESubs/i);
     let rawLangs = langsMatch ? langsMatch[1] : "Multi";
     const langMap = { 'hindi': 'Hin', 'english': 'Eng', 'japanese': 'Jap', 'korean': 'Kor', 'tamil': 'Tam', 'telugu': 'Tel', 'chinese': 'Chi', 'spanish': 'Spa','indonesian':'Ido', 'french': 'Fre','german':'Ger' };
     let codes = rawLangs.split(/\s*\+\s*|\s*,\s*|\s*\|\s*/).map(l => { let clean = l.trim().toLowerCase(); return langMap[clean] || (l.length > 3 ? l.substring(0,3) : l); }).join(' + ');
@@ -245,10 +255,8 @@ function openModal(encCont, thumb, encTitle, tags, id) {
     let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
     $html.find('h2,button, a, script, style,option,select').remove();
     let cleanText = $html.text().replace(/\s+/g, ' ').trim();
-    
     $('#m-poster-wrap').addClass('skeleton'); $('#m-poster').attr('src', thumb); $('#m-title').text(name); $('#m-langs').text(codes); $('#m-subs').text(subs); $('#m-summary').text(cleanText);
     $('#links-engine, #season-select').empty(); $('#season-wrap, #quality-wrap').hide();
-    
     let $data = $('<div>').append($.parseHTML(cont)), episodes = $data.find('.episodes');
     if(episodes.length > 0) {
         $('#season-wrap').show();
@@ -278,7 +286,6 @@ function openModal(encCont, thumb, encTitle, tags, id) {
 }
 
 $(document).on('click', '.toggle-group .tgl-btn', function() { $(this).siblings().removeClass('active'); $(this).addClass('active'); updateEngine(); });
-
 function updateEngine() {
     if($('#season-wrap').is(':visible')) {
         $('.ep-grid').removeClass('active');
@@ -310,7 +317,6 @@ function applyStreamLogic(isVlc) {
         }
     });
 }
-
 function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
 
 $(document).ready(() => { popup2004.init(); });
