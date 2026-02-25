@@ -17,7 +17,7 @@
 #popup2004-message { color: #e50914; font-size: 16px; margin-top: 10px; display: none; font-weight: 800; }
 
 /* FIX: Scrolling issue - home-wrap height control */
-#home-wrap { min-height: calc(100vh - 60px); height: auto; overflow: hidden; display: block; }
+#home-wrap { min-height: calc(100vh - 60px); height: auto; overflow: hidden; display: none; } /* Hidden by default */
 html, body { height: 100%; margin: 0; padding: 0; }
 
 :root {  
@@ -113,7 +113,7 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
     <div class='grid-layout' id='search-results' style='display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px;'></div>
   </div>
 
-  <div id='home-wrap' style="display:none;">
+  <div id='home-wrap'>
     <div class='section-container' data-type='latest'><div class='section-title'>Recently Added &#9732;</div><div class='slider'></div></div>
     <div class='section-container' data-label='Action'><div class='section-title'>Action &#9773;</div><div class='slider'></div></div>
     <div class='section-container' data-label='Romance'><div class='section-title'>Romance &#10084;&#65038;</div><div class='slider'></div></div>
@@ -156,7 +156,7 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- POPUP 2004 LOGIC (FORCED VERIFICATION) --- */
+/* --- POPUP 2004 LOGIC (FIXED: PERSISTENT LOCK & REFRESH PROTECTION) --- */
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
     externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
@@ -169,12 +169,12 @@ var popup2004 = {
     setupElements: function() {
       var p = this;
       document.getElementById('popup2004-link').addEventListener('click', function(e) { e.preventDefault(); p.handleLinkClick(); });
-      document.getElementById('popup2004-close').addEventListener('click', function() { p.closePopup(); });
+      document.getElementById('popup2004-close').addEventListener('click', function() { p.grantAccess(); });
     },
     checkShouldShow: function() {
       const now = Date.now();
       if (this.cooldownEnd && now < this.cooldownEnd) {
-          this.grantAccess(); // Bypass popup and start website
+          this.grantAccess();
       } else {
           this.cooldownEnd = null;
           localStorage.removeItem(this.storageKey);
@@ -212,12 +212,13 @@ var popup2004 = {
       document.getElementById('popup2004-close').style.display = 'block';
       document.getElementById('popup2004-link').style.display = 'none';
       document.getElementById('popup2004-message').style.display = 'none';
+      
       this.cooldownEnd = Date.now() + (180 * 60 * 1000); 
       this.saveState();
     },
     grantAccess: function() {
         this.closePopup();
-        initWebsiteContent(); // CRITICAL: Start loading the UI only now
+        initWebsiteContent();
     },
     closePopup: function() { 
         document.getElementById('popup2004-overlay').style.display = 'none'; 
@@ -226,7 +227,7 @@ var popup2004 = {
     showPopup: function() { 
         document.getElementById('popup2004-overlay').style.display = 'flex'; 
         document.body.style.overflow = 'hidden'; 
-        $('#home-wrap').hide(); // Hide main content if popup is visible
+        $('#home-wrap').hide();
     },
     restoreState: function() {
       try {
@@ -253,10 +254,9 @@ function createCard(e) {
             </div>`;
 }
 
-// Logic to initialize content ONLY after verification
 function initWebsiteContent() {
     $('#home-wrap').fadeIn(300);
-    $('#search-input').prop('disabled', false); // Unlock search
+    $('#search-input').prop('disabled', false);
     $('.section-container').each(function() { observer.observe(this); });
 }
 
