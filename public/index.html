@@ -156,12 +156,20 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- POPUP 2004 LOGIC (FIXED TIMER & CHEAT PREVENTION) --- */
+
+
+
+
+
+
+
+/* --- POPUP 2004 LOGIC (FIXED: PERSISTENT LOCK & REFRESH PROTECTION) --- */
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
     externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
     init: function() {
-      this.setupElements(); this.restoreState();
+      this.restoreState();
+      this.setupElements();
       document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
       window.addEventListener('load', this.checkShouldShow.bind(this));
     },
@@ -171,8 +179,16 @@ var popup2004 = {
       document.getElementById('popup2004-close').addEventListener('click', function() { p.closePopup(); });
     },
     checkShouldShow: function() {
-      if (this.cooldownEnd && Date.now() >= this.cooldownEnd) { this.cooldownEnd = null; this.saveState(); }
-      if (!this.cooldownEnd) { this.showPopup(); this.updateTimerDisplay(); }
+      // Check if access is still valid
+      const now = Date.now();
+      if (this.cooldownEnd && now < this.cooldownEnd) {
+          this.closePopup(); // Already verified, hide overlay
+      } else {
+          this.cooldownEnd = null;
+          localStorage.removeItem(this.storageKey); // Clear expired data
+          this.showPopup();
+          this.updateTimerDisplay();
+      }
     },
     handleLinkClick: function() {
       window.open(this.externalUrl, '_blank');
@@ -181,6 +197,7 @@ var popup2004 = {
     startTimer: function() {
       if(this.timer) clearInterval(this.timer);
       this.timerRunning = true;
+      this.secondsLeft = 20; // Ensure starts at 20
       document.getElementById('popup2004-message').style.display = 'none';
       var p = this;
       this.timer = setInterval(function() {
@@ -189,11 +206,11 @@ var popup2004 = {
       }, 1000);
     },
     handleVisibilityChange: function() {
+      // If user returns to tab and timer was active, reset it to punish switching tabs
       if (document.visibilityState === 'visible' && this.timerRunning) {
-         // User returned to tab while timer was still running
          clearInterval(this.timer);
          this.timerRunning = false;
-         this.secondsLeft = 20; // RESET TIMER
+         this.secondsLeft = 20; 
          document.getElementById('popup2004-message').style.display = 'block';
          this.updateTimerDisplay();
       }
@@ -203,18 +220,42 @@ var popup2004 = {
       this.timerRunning = false;
       document.getElementById('popup2004-close').style.display = 'block';
       document.getElementById('popup2004-link').style.display = 'none';
-      this.cooldownEnd = Date.now() + (180 * 60 * 1000); // 3 Hours
+      document.getElementById('popup2004-message').style.display = 'none';
+      
+      // ONLY NOW we grant access for 3 hours
+      this.cooldownEnd = Date.now() + (180 * 60 * 1000); 
       this.saveState();
     },
-    closePopup: function() { document.getElementById('popup2004-overlay').style.display = 'none'; document.body.style.overflow = ''; },
-    showPopup: function() { document.getElementById('popup2004-overlay').style.display = 'flex'; document.body.style.overflow = 'hidden'; },
-    restoreState: function() {
-      var d = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
-      this.cooldownEnd = d.cooldownEnd || null;
+    closePopup: function() { 
+        document.getElementById('popup2004-overlay').style.display = 'none'; 
+        document.body.style.overflow = ''; 
     },
-    saveState: function() { localStorage.setItem(this.storageKey, JSON.stringify({cooldownEnd: this.cooldownEnd})); },
-    updateTimerDisplay: function() { document.getElementById('popup2004-timer').textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's'; }
+    showPopup: function() { 
+        document.getElementById('popup2004-overlay').style.display = 'flex'; 
+        document.body.style.overflow = 'hidden'; 
+    },
+    restoreState: function() {
+      try {
+          var d = JSON.parse(localStorage.getItem(this.storageKey));
+          if (d && d.cooldownEnd) this.cooldownEnd = d.cooldownEnd;
+      } catch (e) { this.cooldownEnd = null; }
+    },
+    saveState: function() { 
+        localStorage.setItem(this.storageKey, JSON.stringify({cooldownEnd: this.cooldownEnd})); 
+    },
+    updateTimerDisplay: function() { 
+        document.getElementById('popup2004-timer').textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's'; 
+    }
 };
+
+
+
+
+
+
+
+
+
 
 /* --- EXACT LOGICS FROM YOUR CODE --- */
 let linkStore = new Map(), currentId = "", searchTimer;
