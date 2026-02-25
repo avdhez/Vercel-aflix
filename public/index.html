@@ -10,30 +10,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
 <style>
-/* POPUP 2004 SYSTEM CSS */
+/* --- POPUP 2004 SYSTEM CSS --- */
 #popup2004-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: none; align-items: center; justify-content: center; visibility: visible; }
 .popup-card { background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:70%; text-align:center; }
 #popup2004-timer { color: #fff; font-weight: 800; margin: 10px 0; display: block; font-size: 16px; }
 #popup2004-message { color: #e50914; font-size: 16px; margin-top: 10px; display: none; font-weight: 800; }
 
-/* FIX: Content lock logic */
-#home-wrap { 
-    min-height: calc(100vh - 60px); 
-    height: auto; 
-    overflow: hidden; 
-    display: block;
-    opacity: 0; /* Hidden but layout exists for Observer */
-    visibility: hidden;
-    transition: opacity 0.5s ease;
-    pointer-events: none; /* Prevent clicks while locked */
-}
-body.access-granted #home-wrap { 
-    opacity: 1; 
-    visibility: visible;
-    pointer-events: auto; 
-}
-
-html, body { height: 100%; margin: 0; padding: 0; }
+/* --- CONTENT VISIBILITY --- */
+#home-wrap { display: none; } /* Hidden until access granted */
 
 :root {  
     --primary: #e50914;  
@@ -49,10 +33,7 @@ html, body { height: 100%; margin: 0; padding: 0; }
     -webkit-tap-highlight-color: transparent !important; margin:0; padding:0; box-sizing:border-box; 
 }
 
-a, button, [onclick], select, option {
-    pointer-events: auto !important;
-    cursor: pointer !important;
-}
+a, button, [onclick], select, option { pointer-events: auto !important; cursor: pointer !important; }
 
 body {  
     background: var(--bg); color: #fff; font-family: 'Jost', sans-serif;  
@@ -163,6 +144,7 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
+/* --- POPUP SYSTEM LOGIC --- */
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
     externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
@@ -178,11 +160,8 @@ var popup2004 = {
       document.getElementById('popup2004-close').addEventListener('click', function() { p.grantAccess(); });
     },
     checkShouldShow: function() {
-      if (this.cooldownEnd && Date.now() < this.cooldownEnd) {
-          this.grantAccess();
-      } else {
-          this.showPopup();
-      }
+      if (this.cooldownEnd && Date.now() < this.cooldownEnd) { this.grantAccess(); } 
+      else { this.showPopup(); }
     },
     handleLinkClick: function() { window.open(this.externalUrl, '_blank'); this.startTimer(); },
     startTimer: function() {
@@ -209,10 +188,10 @@ var popup2004 = {
     },
     grantAccess: function() {
         document.getElementById('popup2004-overlay').style.display = 'none';
-        document.body.classList.add('access-granted');
+        $('#home-wrap').show();
         $('#search-input').prop('disabled', false);
-        // Force the observer to check positions now that content is visible
-        window.dispatchEvent(new Event('scroll'));
+        // Start your original observer logic
+        $('.section-container').each(function() { observer.observe(this); });
     },
     showPopup: function() { document.getElementById('popup2004-overlay').style.display = 'flex'; },
     restoreState: function() {
@@ -222,8 +201,26 @@ var popup2004 = {
     updateTimerDisplay: function() { document.getElementById('popup2004-timer').textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's'; }
 };
 
-/* --- CORE LOGIC --- */
+// <![CDATA[
+/* --- YOUR ORIGINAL LOGIC (EXACTLY AS PROVIDED) --- */
 let linkStore = new Map(), currentId = "", searchTimer;
+
+async function startTokenGeneration() {
+    $('#main-gen-btn').text('Redirecting...').prop('disabled', true);
+    try {
+        const res = await fetch(config.vercelApi);
+        const data = await res.json();
+        if (data.shortLink) {
+            window.location.href = data.shortLink;
+        } else {
+            alert("API response error.");
+            $('#main-gen-btn').text('Unlock Access').prop('disabled', false);
+        }
+    } catch (e) { 
+        $('#main-gen-btn').text('Unlock Access').prop('disabled', false); 
+        alert("Connection failed.");
+    }
+}
 
 function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
 function createCard(e) {
@@ -233,69 +230,134 @@ function createCard(e) {
             </div>`;
 }
 
+$('#search-input').on('input', function() {
+    clearTimeout(searchTimer);
+    let q = $(this).val();
+
+    if(q.length > 2) {
+        $('#search-overlay').show(); 
+        $('body').addClass('search-open');
+        $('#search-results').html(Array(9).fill('<div class="thumb-card skeleton"></div>').join(''));
+
+        searchTimer = setTimeout(() => {
+            $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
+                if (data && data.feed && data.feed.entry) {
+                    const limitedEntries = data.feed.entry.slice(0, 9);
+                    $('#search-results').html(limitedEntries.map(e => createCard(e)).join(''));
+                } else {
+                    $('#search-results').html('<p style="padding:20px; color:#555">No results found.</p>');
+                }
+            });
+        }, 400);
+    } else if(q.length === 0) {
+        $('#search-overlay').hide();
+        $('body').removeClass('search-open');
+        $('#search-results').empty();
+    }
+});
+
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if(entry.isIntersecting) {
             const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
             slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
+
             let url = type === 'latest' ? `${config.feedApi}?max-results=15` : `${config.feedApi}?label=${lbl}&max-results=15`;
-            $.getJSON(url, (data) => { if(data && data.feed && data.feed.entry) slider.innerHTML = data.feed.entry.map(e => createCard(e)).join(''); });
+
+            $.getJSON(url, (data) => { 
+                if(data && data.feed && data.feed.entry) {
+                    const limitedEntries = data.feed.entry.slice(0, 15);
+                    slider.innerHTML = limitedEntries.map(e => createCard(e)).join(''); 
+                }
+            });
             observer.unobserve(entry.target);
         }
     });
 }, { threshold: 0.1 });
 
-// Initialize everything on ready
-$(document).ready(() => { 
-    popup2004.init();
-    $('.section-container').each(function() { observer.observe(this); });
-});
-
-/* Search and Modal Logic remains exactly the same as your source */
-$('#search-input').on('input', function() {
-    clearTimeout(searchTimer);
-    let q = $(this).val();
-    if(q.length > 2) {
-        $('#search-overlay').show(); $('body').addClass('search-open');
-        searchTimer = setTimeout(() => {
-            $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
-                if (data?.feed?.entry) $('#search-results').html(data.feed.entry.map(e => createCard(e)).join(''));
-                else $('#search-results').html('<p style="padding:20px; color:#555">No results found.</p>');
-            });
-        }, 400);
-    } else if(q.length === 0) { $('#search-overlay').hide(); $('body').removeClass('search-open'); }
-});
-
 function openModal(encCont, thumb, encTitle, tags, id) {
     currentId = id;
     let fullTitle = decodeURIComponent(encTitle);
     let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
+    let langsMatch = fullTitle.match(/\[(.*?)\]/);
+    let subsMatch = fullTitle.match(/ESubs/i);
+    let rawLangs = langsMatch ? langsMatch[1] : "Multi";
+    const langMap = { 'hindi': 'Hin', 'english': 'Eng', 'japanese': 'Jap', 'korean': 'Kor', 'tamil': 'Tam', 'telugu': 'Tel', 'chinese': 'Chi', 'spanish': 'Spa','indonesian':'Ido', 'french': 'Fre','german':'Ger' };
+    let codes = rawLangs.split(/\s*\+\s*|\s*,\s*|\s*\|\s*/).map(l => { let clean = l.trim().toLowerCase(); return langMap[clean] || (l.length > 3 ? l.substring(0,3) : l); }).join(' + ');
+    let subs = subsMatch ? "Yes" : "No";
     let cont = decodeURIComponent(encCont), $html = $('<div>').append($.parseHTML(cont));
-    $('#m-poster').attr('src', thumb); $('#m-title').text(name); $('#m-summary').text($html.text().substring(0,200) + '...');
-    
-    // Simple link engine setup
-    $('#links-engine').empty();
-    let movieGrid = $('<div class="ep-grid active"></div>');
-    $html.find('button[onclick*="http"]').each(function() { movieGrid.append($(this).clone()); });
-    $('#links-engine').append(movieGrid);
-    
+    let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
+    $html.find('h2,button, a, script, style,option,select').remove();
+    let cleanText = $html.text().replace(/\s+/g, ' ').trim();
+    $('#m-poster-wrap').addClass('skeleton'); $('#m-poster').attr('src', thumb); $('#m-title').text(name); $('#m-langs').text(codes); $('#m-subs').text(subs); $('#m-summary').text(cleanText);
+    $('#links-engine, #season-select').empty(); $('#season-wrap, #quality-wrap').hide();
+    let $data = $('<div>').append($.parseHTML(cont)), episodes = $data.find('.episodes');
+    if(episodes.length > 0) {
+        $('#season-wrap').show();
+        episodes.each(function(i) {
+            let sNum = i + 1, displayLabel = seasonNames[i] ? seasonNames[i] : `Season ${sNum}`;
+            $('#season-select').append(`<option value="${sNum}">${displayLabel}</option>`);
+            if($(this).find('#480p, #720p').length > 0) {
+                $('#quality-wrap').show();
+                ['480p', '720p'].forEach(q => {
+                    let grid = $('<div class="ep-grid"></div>').attr('id', `s${sNum}-${q}`);
+                    $(this).find(`#${q} button`).each(function() { grid.append($(this).clone()); });
+                    $('#links-engine').append(grid);
+                });
+            } else {
+                let grid = $('<div class="ep-grid"></div>').attr('id', `s${sNum}-single`);
+                $(this).find('button').each(function() { grid.append($(this).clone()); });
+                $('#links-engine').append(grid);
+            }
+        });
+    } else {
+        let movieGrid = $('<div class="ep-grid active"></div>');
+        $data.find('button[onclick*="http"]').each(function() { if(!$(this).text().match(/PLAY|DOWNLOAD/i)) movieGrid.append($(this).clone()); });
+        $('#links-engine').append(movieGrid);
+    }
     $('#post-modal').fadeIn(200); $('body').addClass('modal-open');
+    updateEngine();
+}
+
+$(document).on('click', '.toggle-group .tgl-btn', function() { $(this).siblings().removeClass('active'); $(this).addClass('active'); updateEngine(); });
+function updateEngine() {
+    if($('#season-wrap').is(':visible')) {
+        $('.ep-grid').removeClass('active');
+        let s = $('#season-select').val(), q = $('#quality-wrap .tgl-btn.active').data('q');
+        let target = $(`#s${s}-single`).length ? `#s${s}-single` : `#s${s}-${q}`;
+        $(target).addClass('active');
+    }
     applyStreamLogic($('#mode-watch').hasClass('active'));
 }
 
 function applyStreamLogic(isVlc) {
+    const ua = navigator.userAgent.toLowerCase();
+    const isAnd = /android/.test(ua), isIos = /iphone|ipad|ipod/.test(ua);
     document.querySelectorAll('#links-engine button').forEach(btn => {
         if(!linkStore.has(btn)) linkStore.set(btn, btn.getAttribute('onclick'));
         let originalOnclick = linkStore.get(btn);
         let m = originalOnclick.match(/https?:\/\/[^\s'"]+/);
         if(m) {
             let targetUrl = m[0];
-            if (isVlc) btn.setAttribute('onclick', `window.location.href='vlc://${targetUrl}'`);
-            else btn.setAttribute('onclick', `window.open('${targetUrl}')`);
+            if (targetUrl.includes(config.oldDomain)) {
+                let u = new URL(targetUrl); u.hostname = config.newDomain.split(':')[0]; u.port = config.newDomain.split(':')[1] || ""; u.protocol = config.newProtocol;
+                targetUrl = u.toString();
+            }
+            if (isVlc) {
+                if (isAnd) btn.setAttribute('onclick', `window.location.href='intent://${targetUrl.replace(/^https?:\/\//,'')}#Intent;scheme=http;type=video/*;action=android.intent.action.VIEW;end'`);
+                else if (isIos) btn.setAttribute('onclick', `window.location.href='vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(targetUrl)}'`);
+                else btn.setAttribute('onclick', `window.location.href='vlc://${targetUrl}'`);
+            } else { btn.setAttribute('onclick', `window.open('${targetUrl}')`); }
         }
     });
 }
-function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); }
+function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
+
+/* --- RUN POPUP ON START --- */
+$(document).ready(() => { 
+    popup2004.init(); 
+});
+// ]]>
 </script>
 </body>
 </html>
