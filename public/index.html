@@ -10,41 +10,25 @@
 <link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
 <style>
-/* --- POPUP 2004 SYSTEM CSS --- */
+/* --- POPUP SYSTEM --- */
 #popup2004-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: none; align-items: center; justify-content: center; visibility: visible; }
 .popup-card { background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:70%; text-align:center; }
 #popup2004-timer { color: #fff; font-weight: 800; margin: 10px 0; display: block; font-size: 16px; }
 #popup2004-message { color: #e50914; font-size: 16px; margin-top: 10px; display: none; font-weight: 800; }
 
-/* --- CONTENT VISIBILITY --- */
-#home-wrap { display: none; } /* Hidden until access granted */
+/* --- CONTENT HIDDEN UNTIL ACCESS --- */
+#home-wrap { display: none; }
 
-:root {  
-    --primary: #e50914;  
-    --bg: #050505;  
-    --glass: rgba(255, 255, 255, 0.08);  
-    --radius: 8px;
-}
-
-* {
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    user-select: none !important;
-    -webkit-tap-highlight-color: transparent !important; margin:0; padding:0; box-sizing:border-box; 
-}
-
+:root { --primary: #e50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.08); --radius: 8px; }
+* { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important; margin:0; padding:0; box-sizing:border-box; }
 a, button, [onclick], select, option { pointer-events: auto !important; cursor: pointer !important; }
 
-body {  
-    background: var(--bg); color: #fff; font-family: 'Jost', sans-serif;  
-    margin: 0; padding-top: 55px; overflow-x: hidden;  
-    font-size: 13px; font-weight: 600; 
-}
+body { background: var(--bg); color: #fff; font-family: 'Jost', sans-serif; margin: 0; padding-top: 55px; overflow-x: hidden; font-size: 13px; font-weight: 600; }
 body.search-open, body.modal-open { overflow: hidden !important; }
 
 nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; box-sizing: border-box; }
 .logo { color: var(--primary); font-size: 21px; font-weight: 900; text-decoration: none; letter-spacing: 2px; font-family: 'Jost', serif; }
-#search-input { background: rgba(255, 255, 255, 0.1); border: 0px solid; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit; letter-spacing: 1px;}
+#search-input { background: rgba(255, 255, 255, 0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit; }
 #search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4% 20px; box-sizing: border-box; overflow-y: auto; }
 
 @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
@@ -57,9 +41,9 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
 .thumb-card img.loaded { opacity: 1; }
 
-#post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(10px); }
+#post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
 .close-x { font-family: 'Aoboshi One'; position: fixed; top: 8px; right: 30px; font-size: 28px; cursor: pointer; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-.modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); min-height:0vh; max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 1), 0 0 20px rgba(0,0,0,0.5); }
+.modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; }
 .info-block { padding: 15px; display: flex; gap: 18px; align-items: flex-start; background: linear-gradient(180deg, #111 0%, #000 100%); }
 .m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; border: 1px solid #222; flex-shrink: 0; }
 .m-poster-box img { width: 100%; height: 100%; object-fit: cover; }
@@ -76,7 +60,7 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 #links-engine { padding: 5px 20px 15px; }
 .ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 187px; overflow-y: auto; }
 .ep-grid.active { display: grid; }
-.ep-grid button {text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.ep-grid button { text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
 .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: 100%; font-family: inherit; margin: 5px; }
 </style>
 </head>
@@ -144,7 +128,7 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- POPUP SYSTEM LOGIC --- */
+/* --- POPUP LOGIC --- */
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
     externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
@@ -160,8 +144,8 @@ var popup2004 = {
       document.getElementById('popup2004-close').addEventListener('click', function() { p.grantAccess(); });
     },
     checkShouldShow: function() {
-      if (this.cooldownEnd && Date.now() < this.cooldownEnd) { this.grantAccess(); } 
-      else { this.showPopup(); }
+      if (this.cooldownEnd && Date.now() < this.cooldownEnd) this.grantAccess();
+      else this.showPopup();
     },
     handleLinkClick: function() { window.open(this.externalUrl, '_blank'); this.startTimer(); },
     startTimer: function() {
@@ -190,37 +174,17 @@ var popup2004 = {
         document.getElementById('popup2004-overlay').style.display = 'none';
         $('#home-wrap').show();
         $('#search-input').prop('disabled', false);
-        // Start your original observer logic
         $('.section-container').each(function() { observer.observe(this); });
     },
     showPopup: function() { document.getElementById('popup2004-overlay').style.display = 'flex'; },
-    restoreState: function() {
-      try { var d = JSON.parse(localStorage.getItem(this.storageKey)); if (d) this.cooldownEnd = d.cooldownEnd; } catch (e) {}
-    },
+    restoreState: function() { try { var d = JSON.parse(localStorage.getItem(this.storageKey)); if (d) this.cooldownEnd = d.cooldownEnd; } catch (e) {} },
     saveState: function() { localStorage.setItem(this.storageKey, JSON.stringify({cooldownEnd: this.cooldownEnd})); },
     updateTimerDisplay: function() { document.getElementById('popup2004-timer').textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's'; }
 };
 
 // <![CDATA[
-/* --- YOUR ORIGINAL LOGIC (EXACTLY AS PROVIDED) --- */
+/* --- EXACT ORIGINAL LOGICS --- */
 let linkStore = new Map(), currentId = "", searchTimer;
-
-async function startTokenGeneration() {
-    $('#main-gen-btn').text('Redirecting...').prop('disabled', true);
-    try {
-        const res = await fetch(config.vercelApi);
-        const data = await res.json();
-        if (data.shortLink) {
-            window.location.href = data.shortLink;
-        } else {
-            alert("API response error.");
-            $('#main-gen-btn').text('Unlock Access').prop('disabled', false);
-        }
-    } catch (e) { 
-        $('#main-gen-btn').text('Unlock Access').prop('disabled', false); 
-        alert("Connection failed.");
-    }
-}
 
 function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
 function createCard(e) {
@@ -233,12 +197,9 @@ function createCard(e) {
 $('#search-input').on('input', function() {
     clearTimeout(searchTimer);
     let q = $(this).val();
-
     if(q.length > 2) {
-        $('#search-overlay').show(); 
-        $('body').addClass('search-open');
+        $('#search-overlay').show(); $('body').addClass('search-open');
         $('#search-results').html(Array(9).fill('<div class="thumb-card skeleton"></div>').join(''));
-
         searchTimer = setTimeout(() => {
             $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
                 if (data && data.feed && data.feed.entry) {
@@ -250,9 +211,7 @@ $('#search-input').on('input', function() {
             });
         }, 400);
     } else if(q.length === 0) {
-        $('#search-overlay').hide();
-        $('body').removeClass('search-open');
-        $('#search-results').empty();
+        $('#search-overlay').hide(); $('body').removeClass('search-open'); $('#search-results').empty();
     }
 });
 
@@ -261,9 +220,7 @@ const observer = new IntersectionObserver((entries) => {
         if(entry.isIntersecting) {
             const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
             slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
-
             let url = type === 'latest' ? `${config.feedApi}?max-results=15` : `${config.feedApi}?label=${lbl}&max-results=15`;
-
             $.getJSON(url, (data) => { 
                 if(data && data.feed && data.feed.entry) {
                     const limitedEntries = data.feed.entry.slice(0, 15);
@@ -279,8 +236,7 @@ function openModal(encCont, thumb, encTitle, tags, id) {
     currentId = id;
     let fullTitle = decodeURIComponent(encTitle);
     let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
-    let langsMatch = fullTitle.match(/\[(.*?)\]/);
-    let subsMatch = fullTitle.match(/ESubs/i);
+    let langsMatch = fullTitle.match(/\[(.*?)\]/), subsMatch = fullTitle.match(/ESubs/i);
     let rawLangs = langsMatch ? langsMatch[1] : "Multi";
     const langMap = { 'hindi': 'Hin', 'english': 'Eng', 'japanese': 'Jap', 'korean': 'Kor', 'tamil': 'Tam', 'telugu': 'Tel', 'chinese': 'Chi', 'spanish': 'Spa','indonesian':'Ido', 'french': 'Fre','german':'Ger' };
     let codes = rawLangs.split(/\s*\+\s*|\s*,\s*|\s*\|\s*/).map(l => { let clean = l.trim().toLowerCase(); return langMap[clean] || (l.length > 3 ? l.substring(0,3) : l); }).join(' + ');
@@ -289,8 +245,10 @@ function openModal(encCont, thumb, encTitle, tags, id) {
     let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
     $html.find('h2,button, a, script, style,option,select').remove();
     let cleanText = $html.text().replace(/\s+/g, ' ').trim();
+    
     $('#m-poster-wrap').addClass('skeleton'); $('#m-poster').attr('src', thumb); $('#m-title').text(name); $('#m-langs').text(codes); $('#m-subs').text(subs); $('#m-summary').text(cleanText);
     $('#links-engine, #season-select').empty(); $('#season-wrap, #quality-wrap').hide();
+    
     let $data = $('<div>').append($.parseHTML(cont)), episodes = $data.find('.episodes');
     if(episodes.length > 0) {
         $('#season-wrap').show();
@@ -320,6 +278,7 @@ function openModal(encCont, thumb, encTitle, tags, id) {
 }
 
 $(document).on('click', '.toggle-group .tgl-btn', function() { $(this).siblings().removeClass('active'); $(this).addClass('active'); updateEngine(); });
+
 function updateEngine() {
     if($('#season-wrap').is(':visible')) {
         $('.ep-grid').removeClass('active');
@@ -351,12 +310,10 @@ function applyStreamLogic(isVlc) {
         }
     });
 }
+
 function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
 
-/* --- RUN POPUP ON START --- */
-$(document).ready(() => { 
-    popup2004.init(); 
-});
+$(document).ready(() => { popup2004.init(); });
 // ]]>
 </script>
 </body>
