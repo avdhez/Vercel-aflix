@@ -5,36 +5,24 @@
 <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'/>
 <title>AFLIX - Premium Streaming</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
 <style>
-/* --- ORIGINAL STYLES PRESERVED --- */
-#token-lock-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: flex; align-items: center; justify-content: center; visibility: visible; }
-nav, #home-wrap { opacity: 1;}
-
-/* FIX: Scrolling issue - home-wrap height control */
-#home-wrap { min-height: calc(100vh - 60px); height: auto; overflow: hidden; display: block; }
-html, body { height: 100%; margin: 0; padding: 0; }
-
-@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
-  
-  :root {  
+/* --- SYSTEM --- */
+:root {  
     --primary: #e50914;  
     --bg: #050505;  
     --glass: rgba(255, 255, 255, 0.08);  
     --radius: 8px;
-    --poster-h: 140px;
-  }
-  
-/* --- SYSTEM --- */
+}
 
 * {
     -webkit-touch-callout: none !important;
     -webkit-user-select: none !important;
-    -khtml-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
     user-select: none !important;
-    -webkit-user-drag: none !important;
-    -webkit-tap-highlight-color: transparent !important;margin:0; padding:0; box-sizing:border-box; 
+    margin:0; padding:0; box-sizing:border-box; 
 }
 
 a, button, [onclick], select, option {
@@ -42,71 +30,71 @@ a, button, [onclick], select, option {
     cursor: pointer !important;
 }
 
-  body {  
+body {  
     background: var(--bg); color: #fff; font-family: 'Jost', sans-serif;  
     margin: 0; padding-top: 55px; overflow-x: hidden;  
     font-size: 13px; font-weight: 600; 
-  }
-  body.search-open, body.modal-open { overflow: hidden !important; }
+}
 
-  nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; box-sizing: border-box; }
-  .logo { color: var(--primary); font-size: 21px; font-weight: 900; text-decoration: none; letter-spacing: 2px; }
-  #search-input { background: rgba(255, 255, 255, 0.1); border: 0px solid; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit;letter-spacing: 1px;}
-  #search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4% 20px; box-sizing: border-box; overflow-y: auto; }
+/* POPUP UI */
+#popup2004-overlay { 
+    position: fixed; inset: 0; background: #050505; z-index: 100000; 
+    display: none; align-items: center; justify-content: center; 
+}
+.popup-card { 
+    background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; 
+    max-width:320px; width:85%; text-align:center; 
+}
+.popup-card h2 { 
+    font-family: 'Aoboshi One', serif; color:var(--primary); 
+    font-size:22px; margin-bottom:10px; font-weight: 400;
+}
+#popup2004-timer { color: #fff; font-weight: 800; margin: 15px 0; display: block; font-size: 16px; }
+#popup2004-message { color: #e50914; font-size: 12px; margin-top: 10px; display: none; font-weight: 700; }
 
-  @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
-  .skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s infinite linear forwards; border-radius: var(--radius); }
+/* REUSED APP STYLES */
+nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; }
+.logo { color: var(--primary); font-family: 'Aoboshi One', serif; font-size: 21px; text-decoration: none; letter-spacing: 2px; }
+#search-input { background: rgba(255, 255, 255, 0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-family: 'Jost', sans-serif; }
+#search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4%; overflow-y: auto; }
 
-  .section-container { padding: 2px 4%; margin-bottom: 2px; }
-  .section-title { font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
-  .slider { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; min-height: 150px; }
-  .thumb-card { flex: 0 0 auto; width: 100px; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass); background: #111; cursor: pointer; }
-  .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
-  .thumb-card img.loaded { opacity: 1; }
+.section-container { padding: 2px 4%; margin-bottom: 2px; }
+.section-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
+.slider { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; min-height: 150px; }
+.thumb-card { flex: 0 0 auto; width: 100px; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass); background: #111; }
+.thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
+.thumb-card img.loaded { opacity: 1; }
 
-  #post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(10px); }
-  .close-x { position: fixed; top: 8px; right: 30px; font-size: 28px; cursor: pointer; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-  .modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); min-height:0vh; max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 1), 0 0 20px rgba(0,0,0,0.5); }
-  .info-block { padding: 15px; display: flex; gap: 18px; align-items: flex-start; background: linear-gradient(180deg, #111 0%, #000 100%); }
-  .m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; border: 1px solid #222; flex-shrink: 0; }
-  .m-poster-box img { width: 100%; height: 100%; object-fit: cover; }
-  .m-summary-box { flex-grow: 1; display: flex; flex-direction: column; height: 155px; overflow: hidden; }
-  .m-meta-item { font-size: 12px; margin-bottom: 2px; color: #ccc; text-transform: uppercase; font-weight: 800;}
-  .m-meta-item b { color: var(--primary); }
-  .m-title { font-size: 15px; line-height: 1.2; margin-bottom: 4px; font-weight: 800; color: #fff; text-transform: uppercase; }
-  .m-desc { color: #888; font-size: 13px; line-height: 1.4; font-weight: 600; overflow-y: auto; padding-right: 5px; flex-grow: 1; border-top: 1px solid #222; margin-top: 5px; }
+.gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: 100%; font-family: 'Jost', sans-serif; margin-top: 10px; }
 
-  .toggle-group { display: flex; gap: 8px; padding: 7px 20px; }
-  .tgl-btn { flex: 1; padding: 9px; border-radius: var(--radius); border: 1px solid #222; background: #141414; color: #777; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: inherit; }
-  .tgl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+/* MODAL SYSTEM */
+#post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+.close-x { position: fixed; top: 8px; right: 30px; font-size: 28px; cursor: pointer; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); min-height:0vh; max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; }
+.info-block { padding: 15px; display: flex; gap: 18px; align-items: flex-start; background: linear-gradient(180deg, #111 0%, #000 100%); }
+.m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; border: 1px solid #222; flex-shrink: 0; }
+.m-poster-box img { width: 100%; height: 100%; object-fit: cover; }
+.m-title { font-family: 'Aoboshi One', serif; font-size: 15px; color: #fff; margin-bottom: 4px; font-weight: 400;}
+.m-desc { color: #888; font-size: 13px; line-height: 1.4; height: 80px; overflow-y: auto; border-top: 1px solid #222; margin-top: 5px; padding-top: 5px; }
 
-  #links-engine { padding: 5px 20px 15px; }
-  .ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 187px; overflow-y: auto; }
-  .ep-grid.active { display: grid; }
-  .ep-grid button:last-child:nth-child(odd) { grid-column: 1 / span 2; }
-  .ep-grid button {text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
-  .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: 100%; font-family: inherit;margin: 5px; }
-
-  /* New Popup Specific UI */
-  #popup2004-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: none; align-items: center; justify-content: center; }
-  .popup-card { background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:73%; text-align:center; }
-  #popup2004-timer { color: #fff; font-weight: 800; margin: 10px 0; display: block; }
-  #popup2004-message { color: #e50914; font-size: 11px; margin-top: 10px; display: none; }
+.toggle-group { display: flex; gap: 8px; padding: 7px 20px; }
+.tgl-btn { flex: 1; padding: 9px; border-radius: var(--radius); border: 1px solid #222; background: #141414; color: #777; font-size: 13px; font-weight: 800; text-transform: uppercase; font-family: inherit; }
+.tgl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+#links-engine { padding: 5px 20px 15px; }
+.ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ep-grid.active { display: grid; }
+.ep-grid button { text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; font-family: inherit; }
 </style>
 </head>
 
-<body id='main-body'>
+<body>
   <div id='popup2004-overlay'>
     <div class='popup-card'>
-      <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;'>Access Locked</h2>
-      <p style='color:#888; margin-bottom:10px;'>Click the button below and stay on the page for 20 seconds to unlock access.</p>
-      
+      <h2>Access Locked</h2>
+      <p style='color:#888; font-size:13px;'>Click unlock and stay on the page for 20 seconds to access the site for 70 minutes.</p>
       <span id="popup2004-timer">Time remaining: 20s</span>
-      
       <button class='gen-btn' id='popup2004-link'>Unlock Now</button>
-      
-      <div id="popup2004-message">You left too early! Please return and finish the timer.</div>
-      
+      <div id="popup2004-message">You left too early! Return and finish the timer.</div>
       <button class='gen-btn' id='popup2004-close' style='display:none; background:#22bb33;'>Enter Site</button>
     </div>
   </div>
@@ -133,21 +121,12 @@ a, button, [onclick], select, option {
         <div class='m-poster-box skeleton' id='m-poster-wrap'><img id='m-poster' src=''/></div>
         <div class='m-summary-box'>
           <div class='m-title' id='m-title'></div>
-          <div class='m-meta-item'><b>Lang:</b> <span id='m-langs'>-</span></div>
-          <div class='m-meta-item'><b>Subs:</b> <span id='m-subs'>None</span></div>
           <div class='m-desc' id='m-summary'></div> 
         </div>
       </div>
       <div class='toggle-group'>
         <button class='tgl-btn active' id='mode-watch'>Watch</button>
         <button class='tgl-btn' id='mode-dl'>Download</button>
-      </div>
-      <div class='toggle-group' id='season-wrap' style='display:none; padding-top:0;'>
-        <select id='season-select' onchange='updateEngine()' style='width:100%; padding:12px; background:#161616; color:#fff; border-radius:8px; border:1px solid #222; font-family:inherit; font-weight:700;text-transform: uppercase;outline: none;'></select>
-      </div>
-      <div class='toggle-group' id='quality-wrap' style='display:none; padding-top:0;'>
-        <button class='tgl-btn active' data-q='480p'>480P</button>
-        <button class='tgl-btn' data-q='720p'>720P</button>
       </div>
       <div id='links-engine'></div>
     </div>
@@ -163,46 +142,23 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- POPUP 2004 LOGIC INTEGRATION --- */
+/* --- POPUP 2004 LOGIC --- */
 var popup2004 = {
-    timer: null,
-    secondsLeft: 20,
-    timerRunning: false,
-    storageKey: 'popup2004_data',
-    externalUrl: 'https://otieu.com/4/9515846',
-    lastActiveTime: null,
-    timeSpentAway: 0,
-    cooldownEnd: null,
-    savedScrollPosition: 0,
+    timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'popup2004_data',
+    externalUrl: 'https://otieu.com/4/9515846', lastActiveTime: null, timeSpentAway: 0, cooldownEnd: null,
     init: function() {
-      this.setupElements();
-      this.restoreState();
+      this.setupElements(); this.restoreState();
       document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
-      window.addEventListener('beforeunload', this.saveState.bind(this));
       window.addEventListener('load', this.checkShouldShow.bind(this));
     },
     setupElements: function() {
-      var popup = this;
-      document.getElementById('popup2004-link').addEventListener('click', function(e) {
-        e.preventDefault();
-        popup.handleLinkClick();
-      });
-      document.getElementById('popup2004-close').addEventListener('click', function() {
-        popup.closePopup();
-      });
+      var p = this;
+      document.getElementById('popup2004-link').addEventListener('click', function(e) { e.preventDefault(); p.handleLinkClick(); });
+      document.getElementById('popup2004-close').addEventListener('click', function() { p.closePopup(); });
     },
     checkShouldShow: function() {
-      var now = Date.now();
-      if (this.cooldownEnd && now >= this.cooldownEnd) {
-        this.cooldownEnd = null;
-        this.saveState();
-      }
-      if (this.cooldownEnd) return;
-      if (this.secondsLeft < 20 || !this.cooldownEnd) {
-        this.showPopup();
-        this.updateTimerDisplay();
-        if (this.timerRunning) document.getElementById('popup2004-message').style.display = 'block';
-      }
+      if (this.cooldownEnd && Date.now() >= this.cooldownEnd) { this.cooldownEnd = null; this.saveState(); }
+      if (!this.cooldownEnd) { this.showPopup(); this.updateTimerDisplay(); }
     },
     handleLinkClick: function() {
       window.open(this.externalUrl, '_blank');
@@ -210,45 +166,29 @@ var popup2004 = {
       if (!this.timerRunning) this.startTimer(); else this.resumeTimer();
     },
     startTimer: function() {
-      this.secondsLeft = 20;
-      this.timerRunning = true;
-      this.timeSpentAway = 0;
+      this.secondsLeft = 20; this.timerRunning = true; this.timeSpentAway = 0;
       document.getElementById('popup2004-message').style.display = 'none';
       this.runTimer();
-      this.showPopup();
     },
     resumeTimer: function() {
-      var remainingTime = 20000 - this.timeSpentAway;
-      this.secondsLeft = Math.ceil(remainingTime / 1000);
-      this.timerRunning = true;
-      document.getElementById('popup2004-message').style.display = 'none';
-      this.runTimer();
+      this.secondsLeft = Math.ceil((20000 - this.timeSpentAway) / 1000);
+      this.timerRunning = true; this.runTimer();
     },
     runTimer: function() {
       if (this.timer) clearInterval(this.timer);
-      this.updateTimerDisplay();
-      var popup = this;
+      var p = this;
       this.timer = setInterval(function() {
-        popup.secondsLeft--;
-        popup.updateTimerDisplay();
-        if (popup.secondsLeft <= 0) popup.completeTask();
-        popup.saveState();
+        p.secondsLeft--; p.updateTimerDisplay();
+        if (p.secondsLeft <= 0) p.completeTask();
+        p.saveState();
       }, 1000);
     },
-    pauseTimer: function() {
-      if (this.timer) { clearInterval(this.timer); this.timer = null; }
-      this.timerRunning = false;
-      if (this.lastActiveTime) this.timeSpentAway += (Date.now() - this.lastActiveTime);
-      this.saveState();
-    },
     handleVisibilityChange: function() {
-      if (document.visibilityState === 'visible') {
-        if (this.lastActiveTime && this.timerRunning) {
-          var timeAway = Date.now() - this.lastActiveTime;
-          if (timeAway < 20000) {
-            this.pauseTimer();
-            document.getElementById('popup2004-message').style.display = 'block';
-          }
+      if (document.visibilityState === 'visible' && this.timerRunning) {
+        var timeAway = Date.now() - this.lastActiveTime;
+        if (timeAway < 19000) { // Slack for return time
+          clearInterval(this.timer); this.timerRunning = false;
+          document.getElementById('popup2004-message').style.display = 'block';
         }
       } else if (document.visibilityState === 'hidden' && this.timerRunning) {
         this.lastActiveTime = Date.now();
@@ -258,162 +198,61 @@ var popup2004 = {
       clearInterval(this.timer);
       document.getElementById('popup2004-close').style.display = 'block';
       document.getElementById('popup2004-link').style.display = 'none';
-      this.timerRunning = false;
-      this.timeSpentAway = 0;
-      this.cooldownEnd = Date.now() + (70 * 60 * 1000);
-      this.saveState();
+      this.cooldownEnd = Date.now() + (70 * 60 * 1000); this.saveState();
     },
-    closePopup: function() {
-      document.getElementById('popup2004-overlay').style.display = 'none';
-      this.enableScroll();
-      this.resetTimer();
-    },
-    resetTimer: function() {
-      this.secondsLeft = 20;
-      this.timerRunning = false;
-      this.timeSpentAway = 0;
-      this.updateTimerDisplay();
-      document.getElementById('popup2004-close').style.display = 'none';
-      document.getElementById('popup2004-link').style.display = 'inline-block';
-      document.getElementById('popup2004-message').style.display = 'none';
-    },
-    showPopup: function() {
-      this.disableScroll();
-      document.getElementById('popup2004-overlay').style.display = 'flex';
-    },
-    disableScroll: function() {
-      this.savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-      document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${this.savedScrollPosition}px`;
-      document.body.style.width = '100%';
-    },
-    enableScroll: function() {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      window.scrollTo(0, this.savedScrollPosition);
-    },
+    closePopup: function() { document.getElementById('popup2004-overlay').style.display = 'none'; document.body.style.overflow = ''; },
+    showPopup: function() { document.getElementById('popup2004-overlay').style.display = 'flex'; document.body.style.overflow = 'hidden'; },
     restoreState: function() {
-      var data = localStorage.getItem(this.storageKey);
-      if (data) {
-        data = JSON.parse(data);
-        this.secondsLeft = data.secondsLeft || 20;
-        this.timerRunning = data.timerRunning || false;
-        this.lastActiveTime = data.lastActiveTime || null;
-        this.timeSpentAway = data.timeSpentAway || 0;
-        this.cooldownEnd = data.cooldownEnd || null;
-        if (this.cooldownEnd && Date.now() >= this.cooldownEnd) this.cooldownEnd = null;
-      }
+      var d = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+      this.secondsLeft = d.secondsLeft || 20; this.cooldownEnd = d.cooldownEnd || null;
     },
     saveState: function() {
-      var data = { secondsLeft: this.secondsLeft, timerRunning: this.timerRunning, lastActiveTime: this.lastActiveTime, timeSpentAway: this.timeSpentAway, cooldownEnd: this.cooldownEnd };
-      localStorage.setItem(this.storageKey, JSON.stringify(data));
+      localStorage.setItem(this.storageKey, JSON.stringify({secondsLeft: this.secondsLeft, cooldownEnd: this.cooldownEnd}));
     },
-    updateTimerDisplay: function() {
-      document.getElementById('popup2004-timer').textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's';
-    }
+    updateTimerDisplay: function() { document.getElementById('popup2004-timer').textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's'; }
 };
 
-/* --- ORIGINAL APP LOGIC CONTINUES --- */
-let linkStore = new Map(), currentId = "", searchTimer;
+/* --- ORIGINAL APP LOGIC --- */
+let linkStore = new Map();
 
 function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
 function createCard(e) {
     let t = getSmartThumb(e.media$thumbnail ? e.media$thumbnail.url : '');
-    return `<div class="thumb-card" onclick="openModal(\`${encodeURIComponent(e.content.$t)}\`, '${t}', \`${encodeURIComponent(e.title.$t)}\`, '${e.category ? e.category.map(c => c.term).join(',') : ''}', '${e.id.$t.split('post-')[1]}')">
+    return `<div class="thumb-card" onclick="openModal(\`${encodeURIComponent(e.content.$t)}\`, '${t}', \`${encodeURIComponent(e.title.$t)}\`, '${e.id.$t.split('post-')[1]}')">
                 <img src="${t}" onload="this.parentElement.classList.remove('skeleton'); this.classList.add('loaded')" loading="lazy"/>
             </div>`;
 }
 
 $('#search-input').on('input', function() {
-    clearTimeout(searchTimer);
     let q = $(this).val();
     if(q.length > 2) {
-        $('#search-overlay').show(); 
-        $('body').addClass('search-open');
-        $('#search-results').html(Array(9).fill('<div class="thumb-card skeleton"></div>').join(''));
-        searchTimer = setTimeout(() => {
-            $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
-                if (data && data.feed && data.feed.entry) {
-                    const limitedEntries = data.feed.entry.slice(0, 9);
-                    $('#search-results').html(limitedEntries.map(e => createCard(e)).join(''));
-                } else {
-                    $('#search-results').html('<p style="padding:20px; color:#555">No results found.</p>');
-                }
-            });
-        }, 400);
-    } else if(q.length === 0) {
-        $('#search-overlay').hide();
-        $('body').removeClass('search-open');
-        $('#search-results').empty();
-    }
+        $('#search-overlay').show();
+        $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
+            if (data.feed.entry) $('#search-results').html(data.feed.entry.map(e => createCard(e)).join(''));
+        });
+    } else { $('#search-overlay').hide(); }
 });
 
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if(entry.isIntersecting) {
             const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
-            slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
             let url = type === 'latest' ? `${config.feedApi}?max-results=15` : `${config.feedApi}?label=${lbl}&max-results=15`;
-            $.getJSON(url, (data) => { 
-                if(data && data.feed && data.feed.entry) {
-                    const limitedEntries = data.feed.entry.slice(0, 15);
-                    slider.innerHTML = limitedEntries.map(e => createCard(e)).join(''); 
-                }
-            });
+            $.getJSON(url, (data) => { if(data.feed.entry) slider.innerHTML = data.feed.entry.map(e => createCard(e)).join(''); });
             observer.unobserve(entry.target);
         }
     });
-}, { threshold: 0.1 });
+});
 
-function openModal(encCont, thumb, encTitle, tags, id) {
-    currentId = id;
-    let fullTitle = decodeURIComponent(encTitle);
-    let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
-    let cont = decodeURIComponent(encCont), $html = $('<div>').append($.parseHTML(cont));
-    let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
-    $html.find('h2,button, a, script, style,option,select').remove();
-    let cleanText = $html.text().replace(/\s+/g, ' ').trim();
-    $('#m-poster-wrap').addClass('skeleton'); $('#m-poster').attr('src', thumb); $('#m-title').text(name); $('#m-summary').text(cleanText);
-    $('#links-engine, #season-select').empty(); $('#season-wrap, #quality-wrap').hide();
-    let $data = $('<div>').append($.parseHTML(cont)), episodes = $data.find('.episodes');
-    if(episodes.length > 0) {
-        $('#season-wrap').show();
-        episodes.each(function(i) {
-            let sNum = i + 1, displayLabel = seasonNames[i] ? seasonNames[i] : `Season ${sNum}`;
-            $('#season-select').append(`<option value="${sNum}">${displayLabel}</option>`);
-            if($(this).find('#480p, #720p').length > 0) {
-                $('#quality-wrap').show();
-                ['480p', '720p'].forEach(q => {
-                    let grid = $('<div class="ep-grid"></div>').attr('id', `s${sNum}-${q}`);
-                    $(this).find(`#${q} button`).each(function() { grid.append($(this).clone()); });
-                    $('#links-engine').append(grid);
-                });
-            } else {
-                let grid = $('<div class="ep-grid"></div>').attr('id', `s${sNum}-single`);
-                $(this).find('button').each(function() { grid.append($(this).clone()); });
-                $('#links-engine').append(grid);
-            }
-        });
-    } else {
-        let movieGrid = $('<div class="ep-grid active"></div>');
-        $data.find('button[onclick*="http"]').each(function() { if(!$(this).text().match(/PLAY|DOWNLOAD/i)) movieGrid.append($(this).clone()); });
-        $('#links-engine').append(movieGrid);
-    }
-    $('#post-modal').fadeIn(200); $('body').addClass('modal-open');
-    updateEngine();
-}
-
-$(document).on('click', '.toggle-group .tgl-btn', function() { $(this).siblings().removeClass('active'); $(this).addClass('active'); updateEngine(); });
-function updateEngine() {
-    if($('#season-wrap').is(':visible')) {
-        $('.ep-grid').removeClass('active');
-        let s = $('#season-select').val(), q = $('#quality-wrap .tgl-btn.active').data('q');
-        let target = $(`#s${s}-single`).length ? `#s${s}-single` : `#s${s}-${q}`;
-        $(target).addClass('active');
-    }
+function openModal(encCont, thumb, encTitle, id) {
+    let cont = decodeURIComponent(encCont), name = decodeURIComponent(encTitle).split(/\[| \d{4}/)[0];
+    $('#m-poster').attr('src', thumb); $('#m-title').text(name);
+    $('#m-summary').text($('<div>').append($.parseHTML(cont)).text().substring(0, 300) + "...");
+    $('#links-engine').empty();
+    let $data = $('<div>').append($.parseHTML(cont)), movieGrid = $('<div class="ep-grid active"></div>');
+    $data.find('button[onclick*="http"]').each(function() { movieGrid.append($(this).clone()); });
+    $('#links-engine').append(movieGrid);
+    $('#post-modal').fadeIn(200);
     applyStreamLogic($('#mode-watch').hasClass('active'));
 }
 
@@ -438,7 +277,10 @@ function applyStreamLogic(isVlc) {
         }
     });
 }
-function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
+
+function closeModal() { $('#post-modal').fadeOut(200); }
+$(document).on('click', '.tgl-btn', function() { $(this).siblings().removeClass('active'); $(this).addClass('active'); applyStreamLogic($('#mode-watch').hasClass('active')); });
+
 $(document).ready(() => { 
     popup2004.init();
     $('.section-container').each(function() { observer.observe(this); }); 
