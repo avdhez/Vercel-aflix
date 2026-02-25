@@ -19,7 +19,7 @@
 /* FIX: Scrolling issue - home-wrap height control */
 #home-wrap { min-height: calc(100vh - 60px); height: auto; overflow: hidden; display: block; }
 html, body { height: 100%; margin: 0; padding: 0; }
-  
+
 :root {  
     --primary: #e50914;  
     --bg: #050505;  
@@ -27,7 +27,7 @@ html, body { height: 100%; margin: 0; padding: 0; }
     --radius: 8px;
     --poster-h: 140px;
 }
-  
+
 /* --- SYSTEM (EXACT COPY) --- */
 * {
     -webkit-touch-callout: none !important;
@@ -106,14 +106,14 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 
   <nav>
     <a class='logo' href='/'>AFLIX</a>
-    <input id='search-input' placeholder='Search...' type='text'/>
+    <input id='search-input' placeholder='Search...' type='text' disabled/>
   </nav>
 
   <div id='search-overlay'>
     <div class='grid-layout' id='search-results' style='display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:12px;'></div>
   </div>
 
-  <div id='home-wrap'>
+  <div id='home-wrap' style="display:none;">
     <div class='section-container' data-type='latest'><div class='section-title'>Recently Added &#9732;</div><div class='slider'></div></div>
     <div class='section-container' data-label='Action'><div class='section-title'>Action &#9773;</div><div class='slider'></div></div>
     <div class='section-container' data-label='Romance'><div class='section-title'>Romance &#10084;&#65038;</div><div class='slider'></div></div>
@@ -156,14 +156,7 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-
-
-
-
-
-
-
-/* --- POPUP 2004 LOGIC (FIXED: PERSISTENT LOCK & REFRESH PROTECTION) --- */
+/* --- POPUP 2004 LOGIC (FORCED VERIFICATION) --- */
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
     externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
@@ -179,13 +172,12 @@ var popup2004 = {
       document.getElementById('popup2004-close').addEventListener('click', function() { p.closePopup(); });
     },
     checkShouldShow: function() {
-      // Check if access is still valid
       const now = Date.now();
       if (this.cooldownEnd && now < this.cooldownEnd) {
-          this.closePopup(); // Already verified, hide overlay
+          this.grantAccess(); // Bypass popup and start website
       } else {
           this.cooldownEnd = null;
-          localStorage.removeItem(this.storageKey); // Clear expired data
+          localStorage.removeItem(this.storageKey);
           this.showPopup();
           this.updateTimerDisplay();
       }
@@ -197,7 +189,7 @@ var popup2004 = {
     startTimer: function() {
       if(this.timer) clearInterval(this.timer);
       this.timerRunning = true;
-      this.secondsLeft = 20; // Ensure starts at 20
+      this.secondsLeft = 20;
       document.getElementById('popup2004-message').style.display = 'none';
       var p = this;
       this.timer = setInterval(function() {
@@ -206,7 +198,6 @@ var popup2004 = {
       }, 1000);
     },
     handleVisibilityChange: function() {
-      // If user returns to tab and timer was active, reset it to punish switching tabs
       if (document.visibilityState === 'visible' && this.timerRunning) {
          clearInterval(this.timer);
          this.timerRunning = false;
@@ -221,10 +212,12 @@ var popup2004 = {
       document.getElementById('popup2004-close').style.display = 'block';
       document.getElementById('popup2004-link').style.display = 'none';
       document.getElementById('popup2004-message').style.display = 'none';
-      
-      // ONLY NOW we grant access for 3 hours
       this.cooldownEnd = Date.now() + (180 * 60 * 1000); 
       this.saveState();
+    },
+    grantAccess: function() {
+        this.closePopup();
+        initWebsiteContent(); // CRITICAL: Start loading the UI only now
     },
     closePopup: function() { 
         document.getElementById('popup2004-overlay').style.display = 'none'; 
@@ -233,6 +226,7 @@ var popup2004 = {
     showPopup: function() { 
         document.getElementById('popup2004-overlay').style.display = 'flex'; 
         document.body.style.overflow = 'hidden'; 
+        $('#home-wrap').hide(); // Hide main content if popup is visible
     },
     restoreState: function() {
       try {
@@ -248,15 +242,6 @@ var popup2004 = {
     }
 };
 
-
-
-
-
-
-
-
-
-
 /* --- EXACT LOGICS FROM YOUR CODE --- */
 let linkStore = new Map(), currentId = "", searchTimer;
 
@@ -266,6 +251,13 @@ function createCard(e) {
     return `<div class="thumb-card" onclick="openModal(\`${encodeURIComponent(e.content.$t)}\`, '${t}', \`${encodeURIComponent(e.title.$t)}\`, '${e.category ? e.category.map(c => c.term).join(',') : ''}', '${e.id.$t.split('post-')[1]}')">
                 <img src="${t}" onload="this.parentElement.classList.remove('skeleton'); this.classList.add('loaded')" loading="lazy"/>
             </div>`;
+}
+
+// Logic to initialize content ONLY after verification
+function initWebsiteContent() {
+    $('#home-wrap').fadeIn(300);
+    $('#search-input').prop('disabled', false); // Unlock search
+    $('.section-container').each(function() { observer.observe(this); });
 }
 
 $('#search-input').on('input', function() {
@@ -381,7 +373,6 @@ function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('mo
 
 $(document).ready(() => { 
     popup2004.init();
-    $('.section-container').each(function() { observer.observe(this); }); 
 });
 // ]]>
 </script>
