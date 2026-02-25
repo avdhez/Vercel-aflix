@@ -3,152 +3,101 @@
 <head>
 <meta charset="UTF-8" />
 <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'/>
-<title>ᴀғʟɪx ᴡᴇʙsɪᴛᴇ</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&display=swap" rel="stylesheet">
-
-<script type='text/javascript'>
-// <![CDATA[
-const config = { 
-    vercelApi: "https://tokenizer-wine.vercel.app/api/token", 
-    feedApi: "/api/feed", 
-    newDomain: "147.135.213.131:20149", 
-    newProtocol: "http:", 
-    oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
-};
-
-/* --- AUTHENTICATION ENGINE --- */
-(async function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token');
-    const savedToken = localStorage.getItem('aflix_access_token');
-    const savedExpiry = localStorage.getItem('aflix_access_expiry');
-
-    if (savedToken && Date.now() < parseInt(savedExpiry)) {
-        document.documentElement.classList.add('verified');
-        if (urlToken) window.history.replaceState({}, document.title, window.location.pathname);
-        return;
-    }
-
-    if (urlToken) {
-        try {
-            const res = await fetch(`${config.vercelApi}?action=validate&token=${urlToken}&burn=true`);
-            const data = await res.json();
-            if (data.valid) {
-                localStorage.setItem('aflix_access_token', 'session_' + Date.now());
-                localStorage.setItem('aflix_access_expiry', data.expiry);
-                document.documentElement.classList.add('verified');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } else {
-                alert("Link expired or invalid. Please generate a new one.");
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        } catch (e) { console.log("Auth error"); }
-    }
-})();
-// ]]>
-</script>
+<title>AFLIX - Premium Streaming</title>
 
 <style>
-/* Anti-Flicker CSS */
-#token-lock-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: flex; align-items: center; justify-content: center; visibility: visible; }
-.verified #token-lock-overlay { display: none !important; visibility: hidden !important; }
-nav, #home-wrap { opacity: 0;}
-.verified nav, .verified #home-wrap { opacity: 1; }
-
-/* FIX: Scrolling issue - home-wrap height control */
-#home-wrap { min-height: calc(100vh - 60px); height: auto; overflow: hidden; display: block; }
-html, body { height: 100%; margin: 0; padding: 0; }
-
 @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Aoboshi+One&display=swap');
   
-  :root {  
+:root {  
     --primary: #e50914;  
     --bg: #050505;  
     --glass: rgba(255, 255, 255, 0.08);  
     --radius: 8px;
-    --poster-h: 140px;
-  }
-  
-/* --- SYSTEM --- */
+}
 
+/* --- POPUP SYSTEM CSS --- */
+#popup2004-overlay {
+    position: fixed; inset: 0; background: var(--bg); z-index: 100000;
+    display: none; align-items: center; justify-content: center; font-family: 'Jost', sans-serif;
+}
+.popup-box {
+    background: #000; padding: 30px; border-radius: 20px; border: 1px solid #222;
+    max-width: 340px; width: 85%; text-align: center; margin: auto;
+    position: relative; top: 50%; transform: translateY(-50%);
+}
+.popup-box h2 { color: var(--primary); margin-bottom: 15px; font-weight: 900; }
+.popup-box p { color: #888; margin-bottom: 20px; font-size: 14px; }
+#popup2004-timer { font-weight: 800; color: #fff; display: block; margin-bottom: 15px; }
+#popup2004-message { color: #ffa500; font-size: 12px; margin-top: 10px; display: none; }
+#popup2004-close { 
+    display: none; background: var(--primary); color: #fff; border: none; 
+    padding: 12px; width: 100%; border-radius: 10px; font-weight: 800; 
+    text-transform: uppercase; cursor: pointer; margin-top: 15px;
+}
+.popup-link-btn {
+    display: inline-block; background: #222; color: #fff; padding: 12px 20px;
+    text-decoration: none; border-radius: 10px; font-weight: 800; text-transform: uppercase;
+}
+
+/* --- SITE SYSTEM --- */
 * {
-    -webkit-touch-callout: none !important;
-    -webkit-user-select: none !important;
-    -khtml-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    user-select: none !important;
-    -webkit-user-drag: none !important;
-    -webkit-tap-highlight-color: transparent !important;margin:0; padding:0; box-sizing:border-box; 
+    -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; 
 }
+a, button, select, option { pointer-events: auto; cursor: pointer; }
 
-/* But allow clicks on links and buttons */
-a, button, [onclick], select, option {
-    pointer-events: auto !important;
-    cursor: pointer !important;
-}
-
-  body {  
+body {  
     background: var(--bg); color: #fff; font-family: 'Jost', sans-serif;  
-    margin: 0; padding-top: 55px; overflow-x: hidden;  
-    font-size: 13px; font-weight: 600; 
-  }
-  body.search-open, body.modal-open { overflow: hidden !important; }
+    margin: 0; padding-top: 55px; overflow-x: hidden; font-size: 13px; 
+}
 
-  nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; box-sizing: border-box; }
-  .logo { color: var(--primary); font-size: 21px; font-weight: 900; text-decoration: none; letter-spacing: 2px; }
-  #search-input { background: rgba(255, 255, 255, 0.1); border: 0px solid; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit;letter-spacing: 1px;}
-  #search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4% 20px; box-sizing: border-box; overflow-y: auto; }
+nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; }
+.logo { color: var(--primary); font-size: 21px; font-weight: 900; text-decoration: none; letter-spacing: 2px; }
+#search-input { background: rgba(255, 255, 255, 0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; font-family: inherit; }
+#search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4%; overflow-y: auto; }
 
-  @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
-  .skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s infinite linear forwards; border-radius: var(--radius); }
+@keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+.skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s infinite linear forwards; border-radius: var(--radius); }
 
-  .section-container { padding: 2px 4%; margin-bottom: 2px; }
-  .section-title { font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
-  .slider { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; min-height: 150px; }
-  .thumb-card { flex: 0 0 auto; width: 100px; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass); background: #111; cursor: pointer; }
-  .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
-  .thumb-card img.loaded { opacity: 1; }
+.section-container { padding: 2px 4%; margin-bottom: 2px; }
+.section-title { font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
+.slider { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; min-height: 150px; }
+.thumb-card { flex: 0 0 auto; width: 100px; aspect-ratio: 2/3; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--glass); background: #111; }
+.thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
+.thumb-card img.loaded { opacity: 1; }
 
-  #post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(10px); }
-  .close-x { position: fixed; top: 8px; right: 30px; font-size: 28px; cursor: pointer; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%;font-weight: 800;font-family: "Aoboshi One"; }
+#post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
+.close-x { position: fixed; top: 8px; right: 30px; font-size: 28px; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; }
+.info-block { padding: 15px; display: flex; gap: 18px; background: linear-gradient(180deg, #111 0%, #000 100%); }
+.m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; border: 1px solid #222; flex-shrink: 0; }
+.m-poster-box img { width: 100%; height: 100%; object-fit: cover; }
+.m-summary-box { flex-grow: 1; display: flex; flex-direction: column; height: 155px; overflow: hidden; }
+.m-title { font-size: 15px; line-height: 1.2; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+.m-meta-item { font-size: 12px; margin-bottom: 2px; color: #ccc; text-transform: uppercase; font-weight: 800;}
+.m-meta-item b { color: var(--primary); }
+.m-desc { color: #888; font-size: 13px; line-height: 1.4; overflow-y: auto; padding-right: 5px; border-top: 1px solid #222; margin-top: 5px; }
 
+.toggle-group { display: flex; gap: 8px; padding: 7px 20px; }
+.tgl-btn { flex: 1; padding: 9px; border-radius: var(--radius); border: 1px solid #222; background: #141414; color: #777; font-size: 13px; font-weight: 800; text-transform: uppercase; font-family: inherit; }
+.tgl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-  .modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); min-height:0vh; max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; box-shadow: 0 20px 60px rgba(0, 0, 0, 1), 0 0 20px rgba(0,0,0,0.5); }
-  .info-block { padding: 15px; display: flex; gap: 18px; align-items: flex-start; background: linear-gradient(180deg, #111 0%, #000 100%); }
-  .m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; border: 1px solid #222; flex-shrink: 0; }
-  .m-poster-box img { width: 100%; height: 100%; object-fit: cover; }
-  .m-summary-box { flex-grow: 1; display: flex; flex-direction: column; height: 155px; overflow: hidden; }
-  .m-meta-item { font-size: 12px; margin-bottom: 2px; color: #ccc; text-transform: uppercase; font-weight: 800;}
-  .m-meta-item b { color: var(--primary); }
-  .m-title { font-size: 15px; line-height: 1.2; margin-bottom: 4px; font-weight: 800; color: #fff; text-transform: uppercase; }
-  .m-desc { color: #888; font-size: 13px; line-height: 1.4; font-weight: 600; overflow-y: auto; padding-right: 5px; flex-grow: 1; border-top: 1px solid #222; margin-top: 5px; }
-
-  .toggle-group { display: flex; gap: 8px; padding: 7px 20px; }
-  .tgl-btn { flex: 1; padding: 9px; border-radius: var(--radius); border: 1px solid #222; background: #141414; color: #777; font-size: 13px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: inherit; }
-  .tgl-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-
-  #links-engine { padding: 5px 20px 15px; }
-  .ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 187px; overflow-y: auto; }
-  .ep-grid.active { display: grid; }
-  .ep-grid button:last-child:nth-child(odd) { grid-column: 1 / span 2; }
-  .ep-grid button {text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
-  .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: 100%; font-family: inherit;margin: 5px; }
+#links-engine { padding: 5px 20px 15px; }
+.ep-grid { display: none; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 187px; overflow-y: auto; }
+.ep-grid.active { display: grid; }
+.ep-grid button { text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; font-family: inherit; }
 </style>
 </head>
 
-<body id='main-body'>
-  <div id='token-lock-overlay'>
-    <div style='background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:73%; text-align:center;'>
-      <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;'>Restricted Access</h2>
-      <p style='color:#888; margin-bottom:20px;'>Unlock your 3 hour Access to This Website. To Get Access You Need To Bypass The Shortner link And Get the link with Access Token </p>
-      <button class='gen-btn' id='main-gen-btn' onclick='startTokenGeneration()'>Unlock Access</button>
-      <button class='gen-btn' onclick='window.open("https://zzlinkshh.blogspot.com/p/blog-page.html?m=1")'>How To Get Access</button>
+<body>
+  <div id="popup2004-overlay">
+    <div class="popup-box">
+        <h2>Content Locked</h2>
+        <p>To access the premium stream, click the link below and stay there for 20 seconds.</p>
+        <span id="popup2004-timer">Time remaining: 20s</span>
+        <a href="#" id="popup2004-link" class="popup-link-btn">Unlock Content</a>
+        <div id="popup2004-message">Wait! You left too early. Return and click the link again.</div>
+        <button id="popup2004-close">Enter Site</button>
     </div>
   </div>
 
@@ -163,14 +112,12 @@ a, button, [onclick], select, option {
 
   <div id='home-wrap'>
     <div class='section-container' data-type='latest'><div class='section-title'>Recently Added &#9732;</div><div class='slider'></div></div>
-    
-   <div class='section-container' data-label='Action'><div class='section-title'>Action &#9773;</div><div class='slider'></div></div>
-    
+    <div class='section-container' data-label='Action'><div class='section-title'>Action &#9773;</div><div class='slider'></div></div>
     <div class='section-container' data-label='Romance'><div class='section-title'>Romance &#10084;&#65038;</div><div class='slider'></div></div>
   </div>
 
   <div id='post-modal'>
-    <span class='close-x' onclick='closeModal()'>×</span>
+    <span class='close-x' onclick='closeModal()'>&#215;</span>
     <div class='modal-content'>
       <div class='info-block'>
         <div class='m-poster-box skeleton' id='m-poster-wrap'><img id='m-poster' src=''/></div>
@@ -186,7 +133,7 @@ a, button, [onclick], select, option {
         <button class='tgl-btn' id='mode-dl'>Download</button>
       </div>
       <div class='toggle-group' id='season-wrap' style='display:none; padding-top:0;'>
-        <select id='season-select' onchange='updateEngine()' style='width:100%; padding:12px; background:#161616; color:#fff; border-radius:8px; border:1px solid #222; font-family:inherit; font-weight:700;text-transform: uppercase;outline: none;'></select>
+        <select id='season-select' onchange='updateEngine()' style='width:100%; padding:12px; background:#161616; color:#fff; border-radius:8px; border:1px solid #222; font-family:inherit; font-weight:700; text-transform:uppercase; outline:none;'></select>
       </div>
       <div class='toggle-group' id='quality-wrap' style='display:none; padding-top:0;'>
         <button class='tgl-btn active' data-q='480p'>480P</button>
@@ -199,24 +146,131 @@ a, button, [onclick], select, option {
 <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
 <script type='text/javascript'>
 // <![CDATA[
-let linkStore = new Map(), currentId = "", searchTimer;
+const config = { 
+    feedApi: "/api/feed", 
+    newDomain: "147.135.213.131:20149", 
+    newProtocol: "http:", 
+    oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
+};
 
-async function startTokenGeneration() {
-    $('#main-gen-btn').text('Redirecting...').prop('disabled', true);
-    try {
-        const res = await fetch(config.vercelApi);
-        const data = await res.json();
-        if (data.shortLink) {
-            window.location.href = data.shortLink;
-        } else {
-            alert("API response error.");
-            $('#main-gen-btn').text('Unlock Access').prop('disabled', false);
+/* --- POPUP 2004 LOGIC --- */
+var popup2004 = {
+    timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'popup2004_data',
+    externalUrl: 'https://otieu.com/4/9515846', lastActiveTime: null, timeSpentAway: 0,
+    cooldownEnd: null, savedScrollPosition: 0,
+    init: function() {
+      this.setupElements(); this.restoreState();
+      document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+      window.addEventListener('beforeunload', this.saveState.bind(this));
+      window.addEventListener('load', this.checkShouldShow.bind(this));
+    },
+    setupElements: function() {
+      var p = this;
+      document.getElementById('popup2004-link').addEventListener('click', function(e) { e.preventDefault(); p.handleLinkClick(); });
+      document.getElementById('popup2004-close').addEventListener('click', function() { p.closePopup(); });
+    },
+    checkShouldShow: function() {
+      var now = Date.now();
+      if (this.cooldownEnd && now >= this.cooldownEnd) { this.cooldownEnd = null; this.saveState(); }
+      if (this.cooldownEnd) return;
+      if (this.secondsLeft < 20 || !this.cooldownEnd) {
+        this.showPopup(); this.updateTimerDisplay();
+        if (this.timerRunning) document.getElementById('popup2004-message').style.display = 'block';
+      }
+    },
+    handleLinkClick: function() {
+      window.open(this.externalUrl, '_blank');
+      this.lastActiveTime = Date.now();
+      if (!this.timerRunning) this.startTimer(); else this.resumeTimer();
+    },
+    startTimer: function() {
+      this.secondsLeft = 20; this.timerRunning = true; this.timeSpentAway = 0;
+      document.getElementById('popup2004-message').style.display = 'none';
+      this.runTimer(); this.showPopup();
+    },
+    resumeTimer: function() {
+      var remainingTime = 20000 - this.timeSpentAway;
+      this.secondsLeft = Math.ceil(remainingTime / 1000);
+      this.timerRunning = true; document.getElementById('popup2004-message').style.display = 'none';
+      this.runTimer();
+    },
+    runTimer: function() {
+      if (this.timer) clearInterval(this.timer);
+      this.updateTimerDisplay();
+      var p = this;
+      this.timer = setInterval(function() {
+        p.secondsLeft--; p.updateTimerDisplay();
+        if (p.secondsLeft <= 0) p.completeTask();
+        p.saveState();
+      }, 1000);
+    },
+    pauseTimer: function() {
+      if (this.timer) { clearInterval(this.timer); this.timer = null; }
+      this.timerRunning = false;
+      if (this.lastActiveTime) this.timeSpentAway += (Date.now() - this.lastActiveTime);
+      this.saveState();
+    },
+    handleVisibilityChange: function() {
+      if (document.visibilityState === 'visible') {
+        if (this.lastActiveTime && this.timerRunning) {
+          var timeAway = Date.now() - this.lastActiveTime;
+          if (timeAway < 20000) {
+            this.pauseTimer();
+            document.getElementById('popup2004-message').style.display = 'block';
+          }
         }
-    } catch (e) { 
-        $('#main-gen-btn').text('Unlock Access').prop('disabled', false); 
-        alert("Connection failed.");
-    }
-}
+      } else if (document.visibilityState === 'hidden' && this.timerRunning) {
+        this.lastActiveTime = Date.now();
+      }
+    },
+    completeTask: function() {
+      clearInterval(this.timer);
+      document.getElementById('popup2004-close').style.display = 'block';
+      this.timerRunning = false; this.timeSpentAway = 0;
+      this.cooldownEnd = Date.now() + (70 * 60 * 1000); // 70 minute cooldown
+      this.saveState();
+    },
+    closePopup: function() {
+      document.getElementById('popup2004-overlay').style.display = 'none';
+      this.enableScroll(); this.resetTimer();
+    },
+    resetTimer: function() {
+      this.secondsLeft = 20; this.timerRunning = false; this.timeSpentAway = 0;
+      this.updateTimerDisplay();
+      document.getElementById('popup2004-close').style.display = 'none';
+      document.getElementById('popup2004-message').style.display = 'none';
+    },
+    showPopup: function() { this.disableScroll(); document.getElementById('popup2004-overlay').style.display = 'flex'; },
+    disableScroll: function() {
+      this.savedScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+      document.body.style.overflow = 'hidden'; document.body.style.position = 'fixed';
+      document.body.style.top = `-${this.savedScrollPosition}px`; document.body.style.width = '100%';
+    },
+    enableScroll: function() {
+      document.body.style.overflow = ''; document.body.style.position = '';
+      document.body.style.top = ''; document.body.style.width = '';
+      window.scrollTo(0, this.savedScrollPosition);
+    },
+    restoreState: function() {
+      var data = localStorage.getItem(this.storageKey);
+      if (data) {
+        data = JSON.parse(data);
+        this.secondsLeft = data.secondsLeft || 20;
+        this.timerRunning = data.timerRunning || false;
+        this.lastActiveTime = data.lastActiveTime || null;
+        this.timeSpentAway = data.timeSpentAway || 0;
+        this.cooldownEnd = data.cooldownEnd || null;
+      }
+    },
+    saveState: function() {
+      var data = { secondsLeft: this.secondsLeft, timerRunning: this.timerRunning, lastActiveTime: this.lastActiveTime, timeSpentAway: this.timeSpentAway, cooldownEnd: this.cooldownEnd };
+      localStorage.setItem(this.storageKey, JSON.stringify(data));
+    },
+    updateTimerDisplay: function() { document.getElementById('popup2004-timer').textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's'; }
+};
+
+/* --- CORE APP LOGIC (RESTORED) --- */
+let linkStore = new Map(), currentId = "", searchTimer;
 
 function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
 function createCard(e) {
@@ -229,26 +283,19 @@ function createCard(e) {
 $('#search-input').on('input', function() {
     clearTimeout(searchTimer);
     let q = $(this).val();
-    
     if(q.length > 2) {
-        $('#search-overlay').show(); 
-        $('body').addClass('search-open');
+        $('#search-overlay').show(); $('body').addClass('search-open');
         $('#search-results').html(Array(9).fill('<div class="thumb-card skeleton"></div>').join(''));
-        
         searchTimer = setTimeout(() => {
             $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
                 if (data && data.feed && data.feed.entry) {
                     const limitedEntries = data.feed.entry.slice(0, 9);
                     $('#search-results').html(limitedEntries.map(e => createCard(e)).join(''));
-                } else {
-                    $('#search-results').html('<p style="padding:20px; color:#555">No results found.</p>');
-                }
+                } else { $('#search-results').html('<p style="padding:20px; color:#555">No results found.</p>'); }
             });
         }, 400);
     } else if(q.length === 0) {
-        $('#search-overlay').hide();
-        $('body').removeClass('search-open');
-        $('#search-results').empty();
+        $('#search-overlay').hide(); $('body').removeClass('search-open');
     }
 });
 
@@ -257,9 +304,7 @@ const observer = new IntersectionObserver((entries) => {
         if(entry.isIntersecting) {
             const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
             slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
-            
             let url = type === 'latest' ? `${config.feedApi}?max-results=15` : `${config.feedApi}?label=${lbl}&max-results=15`;
-            
             $.getJSON(url, (data) => { 
                 if(data && data.feed && data.feed.entry) {
                     const limitedEntries = data.feed.entry.slice(0, 15);
@@ -275,17 +320,11 @@ function openModal(encCont, thumb, encTitle, tags, id) {
     currentId = id;
     let fullTitle = decodeURIComponent(encTitle);
     let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
-    let langsMatch = fullTitle.match(/\[(.*?)\]/);
-    let subsMatch = fullTitle.match(/ESubs/i);
-    let rawLangs = langsMatch ? langsMatch[1] : "Multi";
-    const langMap = { 'hindi': 'Hin', 'english': 'Eng', 'japanese': 'Jap', 'korean': 'Kor', 'tamil': 'Tam', 'telugu': 'Tel', 'chinese': 'Chi', 'spanish': 'Spa','indonesian':'Ido', 'french': 'Fre','german':'Ger' };
-    let codes = rawLangs.split(/\s*\+\s*|\s*,\s*|\s*\|\s*/).map(l => { let clean = l.trim().toLowerCase(); return langMap[clean] || (l.length > 3 ? l.substring(0,3) : l); }).join(' + ');
-    let subs = subsMatch ? "Yes" : "No";
     let cont = decodeURIComponent(encCont), $html = $('<div>').append($.parseHTML(cont));
     let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
     $html.find('h2,button, a, script, style,option,select').remove();
     let cleanText = $html.text().replace(/\s+/g, ' ').trim();
-    $('#m-poster-wrap').addClass('skeleton'); $('#m-poster').attr('src', thumb); $('#m-title').text(name); $('#m-langs').text(codes); $('#m-subs').text(subs); $('#m-summary').text(cleanText);
+    $('#m-poster-wrap').addClass('skeleton'); $('#m-poster').attr('src', thumb); $('#m-title').text(name); $('#m-summary').text(cleanText);
     $('#links-engine, #season-select').empty(); $('#season-wrap, #quality-wrap').hide();
     let $data = $('<div>').append($.parseHTML(cont)), episodes = $data.find('.episodes');
     if(episodes.length > 0) {
@@ -315,7 +354,6 @@ function openModal(encCont, thumb, encTitle, tags, id) {
     updateEngine();
 }
 
-$(document).on('click', '.toggle-group .tgl-btn', function() { $(this).siblings().removeClass('active'); $(this).addClass('active'); updateEngine(); });
 function updateEngine() {
     if($('#season-wrap').is(':visible')) {
         $('.ep-grid').removeClass('active');
@@ -347,8 +385,13 @@ function applyStreamLogic(isVlc) {
         }
     });
 }
+
 function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
-$(document).ready(() => { $('.section-container').each(function() { observer.observe(this); }); });
+
+$(document).ready(() => { 
+    popup2004.init();
+    $('.section-container').each(function() { observer.observe(this); }); 
+});
 // ]]>
 </script>
 </body>
