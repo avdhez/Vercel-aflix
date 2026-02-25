@@ -89,10 +89,10 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
   <div id='popup2004-overlay'>
     <div class='popup-card'>
       <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;'>Restricted Access</h2>
-      <p style='color:#888; margin-bottom:15px; font-size: 13px;'>Unlock 3 hours of access. Click "Unlock Access" and stay on the page for 20 seconds.</p>
+      <p style='color:#888; margin-bottom:15px; font-size: 13px;'>Unlock 1 hours of access. Click "Unlock Access" and stay on that page for 20 seconds.</p>
       <span id="popup2004-timer">Time remaining: 20s</span>
       <button class='gen-btn' id='popup2004-link'>Unlock Access</button>
-      <div id="popup2004-message">Timer Reset! You must stay on the tab for 20s.</div>
+      <div id="popup2004-message">Timer Reset! You must stay on that tab for 20s.</div>
       <button class='gen-btn' id='popup2004-close' style='display:none; background: white; color: black;'>Enter Website</button>
     </div>
   </div>
@@ -188,7 +188,7 @@ var popup2004 = {
       clearInterval(this.timer); this.timerRunning = false;
       document.getElementById('popup2004-close').style.display = 'block';
       document.getElementById('popup2004-link').style.display = 'none';
-      this.cooldownEnd = Date.now() + (180 * 60 * 1000); this.saveState();
+      this.cooldownEnd = Date.now() + (60 * 60 * 1000); this.saveState();
     },
     grantAccess: function() {
         document.getElementById('popup2004-overlay').style.display = 'none';
