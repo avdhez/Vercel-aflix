@@ -10,13 +10,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
 <style>
+/* --- CRITICAL: HIDDEN BY DEFAULT TO PREVENT FLASHING --- */
+nav, #home-wrap { display: none !important; }
+
 /* --- POPUP SYSTEM --- */
-#popup2004-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: none; align-items: center; justify-content: center; visibility: visible; }
+#popup2004-overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: #050505; 
+    z-index: 2147483647 !important; /* Maximum possible z-index */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    visibility: visible; 
+    pointer-events: all;
+}
 .popup-card { background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:70%; text-align:center; }
 #popup2004-timer { color: #fff; font-weight: 800; margin: 10px 0; display: block; font-size: 16px; }
 #popup2004-message { color: #e50914; font-size: 14px; margin-top: 10px; display: none; font-weight: 800; text-transform: uppercase; }
-
-#home-wrap { display: none; }
 
 :root { --primary: #e50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.08); --radius: 8px; }
 * { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important; margin:0; padding:0; box-sizing:border-box; }
@@ -66,18 +77,18 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 </style>
 </head>
 
-<body>
-  <div id='popup2004-overlay'>
+<body oncontextmenu="return false;">
+  <div id='popup2004-overlay' oncontextmenu="return false;">
     <div class='popup-card'>
-      <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;'>Verification</h2>
-      <p id='popup-status-text' style='color:#888; margin-bottom:15px; font-size: 13px;'>Click "OPEN AD" and stay on that tab for 20 seconds. Come back and you will get 1 hour of ad-free access.</p>
-      <span id="popup2004-timer">Click On Below Button</span>
+      <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;' id="popup-title">Verification</h2>
+      <p id='popup-status-text' style='color:#888; margin-bottom:15px; font-size: 13px;'>Click "OPEN AD" and stay on that tab for 20 seconds. Come back and you will get 1 hour of adfree access to this site</p>
+      <span id="popup2004-timer">Please Wait...</span>
       <button class='gen-btn' id='popup2004-link'>OPEN AD</button>
-      <div id="popup2004-message">Timer Reset! You came back too early! Go back and stay on that page for 20 seconds.</div>
+      <div id="popup2004-message">Timer Reset! You came back too early! Stay on that page for 20 seconds.</div>
     </div>
   </div>
 
-  <nav>
+  <nav id="top-nav">
     <a class='logo' href='/'>AFLIX</a>
     <input id='search-input' placeholder='Search...' type='text' disabled/>
   </nav>
@@ -128,59 +139,104 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- ENHANCED AUTO-VERIFY POPUP --- */
+/* --- ANTI-BYPASS SECURITY --- */
+const secureSystem = () => {
+    const target = document.getElementById('popup2004-overlay');
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                if (!document.body.contains(target) || target.style.display === 'none') {
+                   if (!popup2004.isVerified()) window.location.reload();
+                }
+            }
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+};
+
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
-    externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null, isTabOpen: false,
-    init: function() {
+    externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
+    
+    isVerified: function() {
+        return this.cooldownEnd && Date.now() < this.cooldownEnd;
+    },
+
+    init: async function() {
       this.restoreState();
       this.setupElements();
-      // Only reset if user returns to THIS tab while timer is running
+      
+      const isBlocked = await this.checkAdblock();
+      if (isBlocked) {
+          this.showAdblockNotice();
+          return;
+      }
+      
       document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') this.securityCheck();
+          if (document.visibilityState === 'visible') this.securityReset();
       });
-      this.checkShouldShow();
+      
+      if (this.isVerified()) {
+          this.grantAccess();
+      } else {
+          this.showPopup();
+          secureSystem(); // Start Anti-Bypass monitoring
+      }
     },
+
+    checkAdblock: function() {
+        return new Promise((resolve) => {
+            fetch('https://otieu.com/4/9515846', { mode: 'no-cors' })
+            .then(() => resolve(false))
+            .catch(() => resolve(true));
+        });
+    },
+
+    showAdblockNotice: function() {
+        this.showPopup();
+        document.getElementById('popup-title').innerText = "AdBlock Detected";
+        document.getElementById('popup-status-text').innerText = "Please disable AdBlocker for otieu.com to access content.";
+        const btn = document.getElementById('popup2004-link');
+        btn.innerText = "REFRESH PAGE";
+        btn.onclick = () => window.location.reload();
+    },
+
     setupElements: function() {
-      var p = this;
-      document.getElementById('popup2004-link').addEventListener('click', function(e) { 
-          e.preventDefault(); 
-          p.handleLinkClick(); 
+      document.getElementById('popup2004-link').addEventListener('click', (e) => { 
+          if(this.timerRunning) return;
+          window.open(this.externalUrl, '_blank'); 
+          this.startTimer(); 
       });
     },
-    checkShouldShow: function() {
-      if (this.cooldownEnd && Date.now() < this.cooldownEnd) this.grantAccess();
-      else this.showPopup();
-    },
-    handleLinkClick: function() { 
-        window.open(this.externalUrl, '_blank'); 
-        this.isTabOpen = true;
-        this.startTimer(); 
-    },
+
     startTimer: function() {
-      var p = this; p.timerRunning = true; p.secondsLeft = 20;
+      this.timerRunning = true; 
+      this.secondsLeft = 20;
       document.getElementById('popup2004-message').style.display = 'none';
-      document.getElementById('popup2004-link').innerText = "STAY ON AD PAGE...";
-      document.getElementById('popup2004-link').disabled = true;
-      if(p.timer) clearInterval(p.timer);
-      p.timer = setInterval(function() {
-        p.secondsLeft--; 
-        p.updateTimerDisplay();
-        if (p.secondsLeft <= 0) p.completeTask();
+      const btn = document.getElementById('popup2004-link');
+      btn.innerText = "STAY ON AD...";
+      btn.disabled = true;
+      
+      this.timer = setInterval(() => {
+        this.secondsLeft--; 
+        this.updateTimerDisplay();
+        if (this.secondsLeft <= 0) this.completeTask();
       }, 1000);
     },
-    securityCheck: function() {
-      // If they come back while timer is still running, they failed.
+
+    securityReset: function() {
       if (this.timerRunning && this.secondsLeft > 0) {
          clearInterval(this.timer); 
          this.timerRunning = false; 
          this.secondsLeft = 20; 
          document.getElementById('popup2004-message').style.display = 'block';
-         document.getElementById('popup2004-link').innerText = "Try Again";
-         document.getElementById('popup2004-link').disabled = false;
+         const btn = document.getElementById('popup2004-link');
+         btn.innerText = "UNLOCK ACCESS";
+         btn.disabled = false;
          this.updateTimerDisplay();
       }
     },
+
     completeTask: function() {
       clearInterval(this.timer); 
       this.timerRunning = false;
@@ -188,20 +244,30 @@ var popup2004 = {
       this.saveState();
       this.grantAccess();
     },
+
     grantAccess: function() {
-        document.getElementById('popup2004-overlay').style.display = 'none';
-        $('#home-wrap').show();
+        // Use JQuery and Native to force removal of !important lock
+        $('#top-nav, #home-wrap').attr('style', 'display: flex !important');
+        $('#home-wrap').attr('style', 'display: block !important');
+        document.getElementById('popup2004-overlay').style.setProperty('display', 'none', 'important');
         $('#search-input').prop('disabled', false);
         $('.section-container').each(function() { observer.observe(this); });
     },
-    showPopup: function() { document.getElementById('popup2004-overlay').style.display = 'flex'; },
+
+    showPopup: function() { 
+        document.getElementById('popup2004-overlay').style.setProperty('display', 'flex', 'important');
+        this.updateTimerDisplay();
+    },
+
     restoreState: function() { try { var d = JSON.parse(localStorage.getItem(this.storageKey)); if (d) this.cooldownEnd = d.cooldownEnd; } catch (e) {} },
     saveState: function() { localStorage.setItem(this.storageKey, JSON.stringify({cooldownEnd: this.cooldownEnd})); },
-    updateTimerDisplay: function() { document.getElementById('popup2004-timer').textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's'; }
+    updateTimerDisplay: function() { 
+        const timerText = document.getElementById('popup2004-timer');
+        timerText.textContent = this.timerRunning ? 'Remaining: ' + this.secondsLeft + 's' : 'Click On Below Button';
+    }
 };
 
-// <![CDATA[
-/* --- ORIGINAL LOGICS --- */
+/* --- OPTIMIZED ORIGINAL LOGICS --- */
 let linkStore = new Map(), currentId = "", searchTimer;
 
 function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
@@ -332,7 +398,6 @@ function applyStreamLogic(isVlc) {
 function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
 
 $(document).ready(() => { popup2004.init(); });
-// ]]>
 </script>
 </body>
 </html>
