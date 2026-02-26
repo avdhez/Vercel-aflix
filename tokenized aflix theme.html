@@ -5,6 +5,11 @@
 <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'/>
 <title>AFLIX - Premium Streaming</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+
 <script type='text/javascript'>
 // <![CDATA[
 const config = { 
@@ -60,7 +65,7 @@ html, body { height: 100%; margin: 0; padding: 0; }
 
 @import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Aoboshi+One&display=swap');
-  
+
   :root {  
     --primary: #e50914;  
     --bg: #050505;  
@@ -68,7 +73,7 @@ html, body { height: 100%; margin: 0; padding: 0; }
     --radius: 8px;
     --poster-h: 140px;
   }
-  
+
 /* --- SYSTEM --- */
 
 * {
@@ -156,9 +161,9 @@ a, button, [onclick], select, option {
 
   <div id='home-wrap'>
     <div class='section-container' data-type='latest'><div class='section-title'>Recently Added &#9732;</div><div class='slider'></div></div>
-    
+
    <div class='section-container' data-label='Action'><div class='section-title'>Action &#9773;</div><div class='slider'></div></div>
-    
+
     <div class='section-container' data-label='Romance'><div class='section-title'>Romance &#10084;&#65038;</div><div class='slider'></div></div>
   </div>
 
@@ -222,12 +227,12 @@ function createCard(e) {
 $('#search-input').on('input', function() {
     clearTimeout(searchTimer);
     let q = $(this).val();
-    
+
     if(q.length > 2) {
         $('#search-overlay').show(); 
         $('body').addClass('search-open');
         $('#search-results').html(Array(9).fill('<div class="thumb-card skeleton"></div>').join(''));
-        
+
         searchTimer = setTimeout(() => {
             $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
                 if (data && data.feed && data.feed.entry) {
@@ -250,9 +255,9 @@ const observer = new IntersectionObserver((entries) => {
         if(entry.isIntersecting) {
             const type = entry.target.getAttribute('data-type'), lbl = entry.target.getAttribute('data-label'), slider = entry.target.querySelector('.slider');
             slider.innerHTML = Array(8).fill('<div class="thumb-card skeleton"></div>').join('');
-            
+
             let url = type === 'latest' ? `${config.feedApi}?max-results=15` : `${config.feedApi}?label=${lbl}&max-results=15`;
-            
+
             $.getJSON(url, (data) => { 
                 if(data && data.feed && data.feed.entry) {
                     const limitedEntries = data.feed.entry.slice(0, 15);
