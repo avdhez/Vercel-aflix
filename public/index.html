@@ -55,11 +55,12 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
 .thumb-card img.loaded { opacity: 1; }
 
-/* Skeleton (Animation Removed) */
-.skeleton { background: #1a1a1a; border-radius: var(--radius); }
+/* Skeleton */
+@keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+.skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s infinite linear forwards; border-radius: var(--radius); }
 
-/* No Result found style */
-.not-found-msg { grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: #555; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+/* No Results Found Styling */
+.no-results { grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #555; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
 /* Modal */
 #post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
@@ -288,10 +289,10 @@ $('#search-input').on('input', function() {
         searchTimer = setTimeout(() => {
             $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
                 if (data && data.feed && data.feed.entry) {
-                    $('#search-results').html(data.feed.entry.slice(0, 9).map(e => createCard(e)).join(''));
-                } else {
-                    $('#search-results').html('<div class="not-found-msg">No Results Found</div>');
-                }
+                   $('#search-results').html(data.feed.entry.slice(0, 9).map(e => createCard(e)).join(''));
+                } else {
+                   $('#search-results').html('<div class="no-results">No Results Found</div>');
+                }
             });
         }, 400);
     } else { $('#search-overlay').hide(); $('body').removeClass('search-open'); }
@@ -301,7 +302,6 @@ function openModal(encCont, thumb, encTitle, tags, id) {
     currentId = id;
     let fullTitle = decodeURIComponent(encTitle);
     
-    // --- LANGUAGE LOGIC PRESERVED ---
     let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
     let langsMatch = fullTitle.match(/\[(.*?)\]/), subsMatch = fullTitle.match(/ESubs/i);
     let rawLangs = langsMatch ? langsMatch[1] : "Multi";
