@@ -27,7 +27,7 @@ body.search-open, body.modal-open { overflow: hidden !important; }
 
 nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; box-sizing: border-box; }
 .logo { color: var(--primary); font-size: 21px; font-weight: 900; text-decoration: none; letter-spacing: 2px; font-family: 'Jost', serif; }
-#search-input { background: rgba(255, 255, 255, 0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit; }
+#search-input { letter-spacing: 1px;background: rgba(255, 255, 255, 0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit; }
 #search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4% 20px; box-sizing: border-box; overflow-y: auto; }
 
 @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
@@ -70,10 +70,10 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
   <div id='popup2004-overlay'>
     <div class='popup-card'>
       <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;'>Verification</h2>
-      <p id='popup-status-text' style='color:#888; margin-bottom:15px; font-size: 13px;'>Click "Unlock Access" and stay on this tab for 20 seconds.</p>
-      <span id="popup2004-timer">Awaiting Click...</span>
-      <button class='gen-btn' id='popup2004-link'>Unlock Access</button>
-      <div id="popup2004-message">Timer Reset! Stay on this page.</div>
+      <p id='popup-status-text' style='color:#888; margin-bottom:15px; font-size: 13px;'>Click "OPEN AD" and stay on that tab for 20 seconds. Comedy back and you will get 1 hour of adfree access to this site</p>
+      <span id="popup2004-timer"> Click On Below Button</span>
+      <button class='gen-btn' id='popup2004-link'>OPEN AD</button>
+      <div id="popup2004-message">Timer Reset! You Came To Early! Go back and Stay on that page For 20 seconds.</div>
     </div>
   </div>
 
@@ -177,7 +177,7 @@ var popup2004 = {
     completeTask: function() {
       clearInterval(this.timer); 
       this.timerRunning = false;
-      this.cooldownEnd = Date.now() + (180 * 60 * 1000); 
+      this.cooldownEnd = Date.now() + (60 * 60 * 1000); 
       this.saveState();
       this.grantAccess(); // AUTO-CLOSE
     },
