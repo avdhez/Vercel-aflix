@@ -12,10 +12,10 @@
 <style>
 /* --- 1. GLITCH PREVENTION CSS --- */
 /* Hide everything initially; our instant script will unlock it for verified users */
-nav, #home-wrap, #popup2004-overlay { display: none; }
+#top-nav, #home-wrap, #popup2004-overlay { display: none; }
 
 /* If the 'verified' class is present on the HTML tag, show content immediately */
-.is-verified nav { display: flex !important; }
+.is-verified #top-nav { display: flex !important; }
 .is-verified #home-wrap { display: block !important; }
 .is-verified #popup2004-overlay { display: none !important; }
 
