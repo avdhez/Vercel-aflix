@@ -10,18 +10,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
 <style>
-/* --- CRITICAL: HIDE EVERYTHING BY DEFAULT TO PREVENT GLITCHING --- */
-nav, #home-wrap, #popup2004-overlay { display: none !important; }
+/* --- 1. GLITCH PREVENTION CSS --- */
+/* Hide everything initially; our instant script will unlock it for verified users */
+nav, #home-wrap, #popup2004-overlay { display: none; }
 
-/* --- POPUP SYSTEM --- */
+/* If the 'verified' class is present on the HTML tag, show content immediately */
+.is-verified nav { display: flex !important; }
+.is-verified #home-wrap { display: block !important; }
+.is-verified #popup2004-overlay { display: none !important; }
+
+/* --- 2. POPUP SYSTEM --- */
 #popup2004-overlay { 
     position: fixed; 
     inset: 0; 
     background: #050505; 
-    z-index: 2147483647 !important;
+    z-index: 2147483647 !important; 
+    display: none; /* Controlled by JS/CSS class */
     align-items: center; 
     justify-content: center; 
     visibility: visible; 
+    pointer-events: all;
 }
 .popup-card { background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:70%; text-align:center; }
 #popup2004-timer { color: #fff; font-weight: 800; margin: 10px 0; display: block; font-size: 16px; }
@@ -29,14 +37,21 @@ nav, #home-wrap, #popup2004-overlay { display: none !important; }
 
 :root { --primary: #e50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.08); --radius: 8px; }
 * { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important; margin:0; padding:0; box-sizing:border-box; }
+a, button, [onclick], select, option { pointer-events: auto !important; cursor: pointer !important; }
 
 body { background: var(--bg); color: #fff; font-family: 'Jost', sans-serif; margin: 0; padding-top: 55px; overflow-x: hidden; font-size: 13px; font-weight: 600; }
 body.search-open, body.modal-open { overflow: hidden !important; }
 
 nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; display: flex; align-items: center; justify-content: space-between; padding: 0 4%; z-index: 1000; box-sizing: border-box; }
 .logo { color: var(--primary); font-size: 21px; font-weight: 900; text-decoration: none; letter-spacing: 2px; font-family: 'Jost', serif; }
-#search-input { letter-spacing: 1px; background: rgba(255, 255, 255, 0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit; }
+#search-input { letter-spacing: 1px;background: rgba(255, 255, 255, 0.1); border: 0; color: #fff; padding: 9px 15px; border-radius: var(--radius); width: 170px; outline: none; font-size: 12px; font-weight: 800; text-transform: uppercase; font-family: inherit; }
 #search-overlay { display: none; position: fixed; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); background: var(--bg); z-index: 999; padding: 20px 4% 20px; box-sizing: border-box; overflow-y: auto; }
+
+/* --- 3. THE BUTTON WIDTH LOGIC --- */
+.ep-grid button:last-child:nth-child(odd) { grid-column: span 2; }
+
+@keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+.skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s infinite linear forwards; border-radius: var(--radius); }
 
 .section-container { padding: 2px 4%; margin-bottom: 2px; }
 .section-title { font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
@@ -48,6 +63,7 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 #post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
 .close-x { font-family: 'Aoboshi One'; position: fixed; top: 8px; right: 30px; font-size: 28px; cursor: pointer; color: #fff; z-index: 10010; width: 45px; height: 45px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 .modal-content { top: 10px; max-width: 440px; width: 73%; margin: 3vh auto; background: black; border-radius: var(--radius); max-height: 92vh; overflow-y: auto; border: 1px solid #1a1a1a; position: relative; }
+.info-block { padding: 15px; display: flex; gap: 18px; align-items: flex-start; background: linear-gradient(180deg, #111 0%, #000 100%); }
 .m-poster-box { width: 105px; height: 155px; border-radius: var(--radius); overflow: hidden; border: 1px solid #222; flex-shrink: 0; }
 .m-poster-box img { width: 100%; height: 100%; object-fit: cover; }
 .m-summary-box { flex-grow: 1; display: flex; flex-direction: column; height: 155px; overflow: hidden; }
@@ -66,33 +82,24 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 .ep-grid button { text-transform: uppercase; background: #161616; color: #eee; border: 1px solid #222; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
 
 .gen-btn { background: var(--primary); color: #fff; border: none; padding: 15px 30px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: 100%; font-family: inherit; margin: 5px; }
-
-@keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
-.skeleton { background: #1a1a1a; background-image: linear-gradient(to right, #1a1a1a 0%, #252525 20%, #1a1a1a 40%, #1a1a1a 100%); background-repeat: no-repeat; background-size: 800px 100%; animation: shimmer 1.5s infinite linear forwards; border-radius: var(--radius); }
 </style>
 </head>
 
 <body oncontextmenu="return false;">
   <script>
     (function() {
-      const key = 'aflix_access_popup';
-      const saved = localStorage.getItem(key);
+      const saved = localStorage.getItem('aflix_access_popup');
       if (saved) {
         const data = JSON.parse(saved);
         if (data.cooldownEnd && Date.now() < data.cooldownEnd) {
+          // Add class to HTML root immediately to override 'display: none'
           document.documentElement.classList.add('is-verified');
-          // Inline CSS to show content immediately
-          const style = document.createElement('style');
-          style.innerHTML = 'nav, #home-wrap { display: flex !important; } #home-wrap { display: block !important; }';
-          document.head.appendChild(style);
-          return;
         }
       }
-      // If not verified, the popup will be shown by the main script
     })();
   </script>
 
-  <div id='popup2004-overlay'>
+  <div id='popup2004-overlay' oncontextmenu="return false;">
     <div class='popup-card'>
       <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;' id="popup-title">Verification</h2>
       <p id='popup-status-text' style='color:#888; margin-bottom:15px; font-size: 13px;'>Click "OPEN AD" and stay on that tab for 20 seconds. Come back and you will get 1 hour of adfree access to this site</p>
@@ -153,20 +160,19 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- ENHANCED SECURITY (KEYBOARD & CONSOLE) --- */
-document.onkeydown = function(e) {
-    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) || (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0))) {
-        return false;
-    }
-};
-
+/* --- ANTI-BYPASS SECURITY --- */
 const secureSystem = () => {
     const target = document.getElementById('popup2004-overlay');
-    new MutationObserver(() => {
-        if (!document.body.contains(target) || (target.style.display === 'none' && !popup2004.isVerified())) {
-            window.location.reload();
-        }
-    }).observe(document.body, { childList: true, subtree: true, attributes: true });
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                if (!document.body.contains(target) || target.style.display === 'none') {
+                   if (!popup2004.isVerified()) window.location.reload();
+                }
+            }
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
 };
 
 var popup2004 = {
@@ -174,25 +180,25 @@ var popup2004 = {
     externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
     
     isVerified: function() {
-        this.restoreState();
         return this.cooldownEnd && Date.now() < this.cooldownEnd;
     },
 
     init: async function() {
+      this.restoreState();
+      this.setupElements();
+      
       if (this.isVerified()) {
           this.grantAccess();
-          return;
-      }
-
-      this.setupElements();
-      const isBlocked = await this.checkAdblock();
-      if (isBlocked) {
-          this.showAdblockNotice();
       } else {
-          this.showPopup();
-          secureSystem();
+          const isBlocked = await this.checkAdblock();
+          if (isBlocked) {
+              this.showAdblockNotice();
+          } else {
+              this.showPopup();
+              secureSystem();
+          }
       }
-
+      
       document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible') this.securityReset();
       });
@@ -260,15 +266,16 @@ var popup2004 = {
     },
 
     grantAccess: function() {
-        $('#top-nav, #home-wrap').attr('style', 'display: flex !important');
-        $('#home-wrap').attr('style', 'display: block !important');
-        document.getElementById('popup2004-overlay').style.setProperty('display', 'none', 'important');
+        // Double down on display to ensure jQuery finishes the job
+        $('#top-nav, #home-wrap').css('display', 'flex');
+        $('#home-wrap').css('display', 'block');
+        $('#popup2004-overlay').hide();
         $('#search-input').prop('disabled', false);
         $('.section-container').each(function() { observer.observe(this); });
     },
 
     showPopup: function() { 
-        document.getElementById('popup2004-overlay').style.setProperty('display', 'flex', 'important');
+        $('#popup2004-overlay').css('display', 'flex');
         this.updateTimerDisplay();
     },
 
@@ -280,7 +287,7 @@ var popup2004 = {
     }
 };
 
-/* --- ORIGINAL LOGICS --- */
+/* --- 4. LANGUAGE & CONTENT LOGIC --- */
 let linkStore = new Map(), currentId = "", searchTimer;
 
 function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
@@ -332,12 +339,15 @@ const observer = new IntersectionObserver((entries) => {
 function openModal(encCont, thumb, encTitle, tags, id) {
     currentId = id;
     let fullTitle = decodeURIComponent(encTitle);
+    
+    // Exact same language mapping as before
     let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
     let langsMatch = fullTitle.match(/\[(.*?)\]/), subsMatch = fullTitle.match(/ESubs/i);
     let rawLangs = langsMatch ? langsMatch[1] : "Multi";
     const langMap = { 'hindi': 'Hin', 'english': 'Eng', 'japanese': 'Jap', 'korean': 'Kor', 'tamil': 'Tam', 'telugu': 'Tel', 'chinese': 'Chi', 'spanish': 'Spa','indonesian':'Ido', 'french': 'Fre','german':'Ger' };
     let codes = rawLangs.split(/\s*\+\s*|\s*,\s*|\s*\|\s*/).map(l => { let clean = l.trim().toLowerCase(); return langMap[clean] || (l.length > 3 ? l.substring(0,3) : l); }).join(' + ');
     let subs = subsMatch ? "Yes" : "No";
+    
     let cont = decodeURIComponent(encCont), $html = $('<div>').append($.parseHTML(cont));
     let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
     $html.find('h2,button, a, script, style,option,select').remove();
