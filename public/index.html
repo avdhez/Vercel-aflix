@@ -16,7 +16,8 @@
 #popup2004-timer { color: #fff; font-weight: 800; margin: 10px 0; display: block; font-size: 16px; }
 #popup2004-message { color: #e50914; font-size: 14px; margin-top: 10px; display: none; font-weight: 800; text-transform: uppercase; }
 
-#home-wrap { display: none; }
+/* HIDE UI UNTIL UNLOCKED */
+#home-wrap, nav { display: none; }
 
 :root { --primary: #e50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.08); --radius: 8px; }
 * { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important; margin:0; padding:0; box-sizing:border-box; }
@@ -77,7 +78,7 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
     </div>
   </div>
 
-  <nav>
+  <nav id="top-nav">
     <a class='logo' href='/'>AFLIX</a>
     <input id='search-input' placeholder='Search...' type='text' disabled/>
   </nav>
@@ -128,7 +129,7 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- ENHANCED SYSTEM WITH ANTI-ADBLOCK --- */
+/* --- ENHANCED SYSTEM WITH HIDDEN NAV & ANTI-ADBLOCK --- */
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
     externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
@@ -137,14 +138,12 @@ var popup2004 = {
       this.restoreState();
       this.setupElements();
       
-      // Step 1: Check for Adblocker first
       const isBlocked = await this.checkAdblock();
       if (isBlocked) {
           this.showAdblockNotice();
           return;
       }
       
-      // Step 2: Regular logic
       document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible') this.securityReset();
       });
@@ -153,7 +152,6 @@ var popup2004 = {
 
     checkAdblock: function() {
         return new Promise((resolve) => {
-            // Check specifically for otieu.com blocking
             fetch('https://otieu.com/4/9515846', { mode: 'no-cors' })
             .then(() => resolve(false))
             .catch(() => resolve(true));
@@ -163,10 +161,10 @@ var popup2004 = {
     showAdblockNotice: function() {
         this.showPopup();
         document.getElementById('popup-title').innerText = "AdBlock Detected";
-        document.getElementById('popup-status-text').innerText = "Please disable your AdBlocker for otieu.com to access the premium content.";
+        document.getElementById('popup-status-text').innerText = "Please disable your AdBlocker for otieu.com to access content.";
         document.getElementById('popup2004-timer').style.display = "none";
         const btn = document.getElementById('popup2004-link');
-        btn.innerText = "I DISABLED IT - REFRESH";
+        btn.innerText = "REFRESH AFTER DISABLING";
         btn.onclick = () => window.location.reload();
     },
 
@@ -186,9 +184,8 @@ var popup2004 = {
     startTimer: function() {
       this.timerRunning = true; 
       this.secondsLeft = 20;
-      const msg = document.getElementById('popup2004-message');
+      document.getElementById('popup2004-message').style.display = 'none';
       const btn = document.getElementById('popup2004-link');
-      msg.style.display = 'none';
       btn.innerText = "VERIFYING...";
       btn.disabled = true;
       btn.style.opacity = "0.5";
@@ -201,7 +198,6 @@ var popup2004 = {
     },
 
     securityReset: function() {
-      // If user comes back to site while timer is still running > 0, they cheated
       if (this.timerRunning && this.secondsLeft > 0) {
          clearInterval(this.timer); 
          this.timerRunning = false; 
@@ -226,6 +222,7 @@ var popup2004 = {
     grantAccess: function() {
         document.getElementById('popup2004-overlay').style.display = 'none';
         document.getElementById('home-wrap').style.display = 'block';
+        document.getElementById('top-nav').style.display = 'flex'; // SHOW NAV
         $('#search-input').prop('disabled', false);
         $('.section-container').each(function() { observer.observe(this); });
     },
@@ -244,7 +241,6 @@ var popup2004 = {
     }
 };
 
-// <![CDATA[
 /* --- OPTIMIZED ORIGINAL LOGICS --- */
 let linkStore = new Map(), currentId = "", searchTimer;
 
@@ -376,7 +372,6 @@ function applyStreamLogic(isVlc) {
 function closeModal() { $('#post-modal').fadeOut(200); $('body').removeClass('modal-open'); linkStore.clear(); }
 
 $(document).ready(() => { popup2004.init(); });
-// ]]>
 </script>
 </body>
 </html>
