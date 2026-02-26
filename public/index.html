@@ -10,14 +10,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Aoboshi+One&family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
 <style>
+/* --- CRITICAL: HIDDEN BY DEFAULT TO PREVENT FLASHING --- */
+nav, #home-wrap { display: none !important; }
+
 /* --- POPUP SYSTEM --- */
-#popup2004-overlay { position: fixed; inset: 0; background: #050505; z-index: 100000; display: none; align-items: center; justify-content: center; visibility: visible; }
+#popup2004-overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: #050505; 
+    z-index: 2147483647 !important; /* Maximum possible z-index */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    visibility: visible; 
+    pointer-events: all;
+}
 .popup-card { background:black; padding:40px 25px; border-radius:30px; border:1px solid #333; max-width:320px; width:70%; text-align:center; }
 #popup2004-timer { color: #fff; font-weight: 800; margin: 10px 0; display: block; font-size: 16px; }
 #popup2004-message { color: #e50914; font-size: 14px; margin-top: 10px; display: none; font-weight: 800; text-transform: uppercase; }
-
-/* HIDE UI UNTIL UNLOCKED */
-#home-wrap, nav { display: none; }
 
 :root { --primary: #e50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.08); --radius: 8px; }
 * { -webkit-touch-callout: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-tap-highlight-color: transparent !important; margin:0; padding:0; box-sizing:border-box; }
@@ -67,8 +77,8 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 </style>
 </head>
 
-<body>
-  <div id='popup2004-overlay'>
+<body oncontextmenu="return false;">
+  <div id='popup2004-overlay' oncontextmenu="return false;">
     <div class='popup-card'>
       <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;' id="popup-title">Verification</h2>
       <p id='popup-status-text' style='color:#888; margin-bottom:15px; font-size: 13px;'>Click "OPEN AD" and stay on that tab for 20 seconds. Come back and you will get 1 hour of adfree access to this site</p>
@@ -129,11 +139,29 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- ENHANCED SYSTEM WITH HIDDEN NAV & ANTI-ADBLOCK --- */
+/* --- ANTI-BYPASS SECURITY --- */
+const secureSystem = () => {
+    const target = document.getElementById('popup2004-overlay');
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                if (!document.body.contains(target) || target.style.display === 'none') {
+                   if (!popup2004.isVerified()) window.location.reload();
+                }
+            }
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+};
+
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
     externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
     
+    isVerified: function() {
+        return this.cooldownEnd && Date.now() < this.cooldownEnd;
+    },
+
     init: async function() {
       this.restoreState();
       this.setupElements();
@@ -147,7 +175,13 @@ var popup2004 = {
       document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible') this.securityReset();
       });
-      this.checkShouldShow();
+      
+      if (this.isVerified()) {
+          this.grantAccess();
+      } else {
+          this.showPopup();
+          secureSystem(); // Start Anti-Bypass monitoring
+      }
     },
 
     checkAdblock: function() {
@@ -161,10 +195,9 @@ var popup2004 = {
     showAdblockNotice: function() {
         this.showPopup();
         document.getElementById('popup-title').innerText = "AdBlock Detected";
-        document.getElementById('popup-status-text').innerText = "Please disable your AdBlocker for otieu.com to access content.";
-        document.getElementById('popup2004-timer').style.display = "none";
+        document.getElementById('popup-status-text').innerText = "Please disable AdBlocker for otieu.com to access content.";
         const btn = document.getElementById('popup2004-link');
-        btn.innerText = "REFRESH AFTER DISABLING";
+        btn.innerText = "REFRESH PAGE";
         btn.onclick = () => window.location.reload();
     },
 
@@ -176,19 +209,13 @@ var popup2004 = {
       });
     },
 
-    checkShouldShow: function() {
-      if (this.cooldownEnd && Date.now() < this.cooldownEnd) this.grantAccess();
-      else this.showPopup();
-    },
-
     startTimer: function() {
       this.timerRunning = true; 
       this.secondsLeft = 20;
       document.getElementById('popup2004-message').style.display = 'none';
       const btn = document.getElementById('popup2004-link');
-      btn.innerText = "VERIFYING...";
+      btn.innerText = "STAY ON AD...";
       btn.disabled = true;
-      btn.style.opacity = "0.5";
       
       this.timer = setInterval(() => {
         this.secondsLeft--; 
@@ -206,7 +233,6 @@ var popup2004 = {
          const btn = document.getElementById('popup2004-link');
          btn.innerText = "UNLOCK ACCESS";
          btn.disabled = false;
-         btn.style.opacity = "1";
          this.updateTimerDisplay();
       }
     },
@@ -220,15 +246,16 @@ var popup2004 = {
     },
 
     grantAccess: function() {
-        document.getElementById('popup2004-overlay').style.display = 'none';
-        document.getElementById('home-wrap').style.display = 'block';
-        document.getElementById('top-nav').style.display = 'flex'; // SHOW NAV
+        // Use JQuery and Native to force removal of !important lock
+        $('#top-nav, #home-wrap').attr('style', 'display: flex !important');
+        $('#home-wrap').attr('style', 'display: block !important');
+        document.getElementById('popup2004-overlay').style.setProperty('display', 'none', 'important');
         $('#search-input').prop('disabled', false);
         $('.section-container').each(function() { observer.observe(this); });
     },
 
     showPopup: function() { 
-        document.getElementById('popup2004-overlay').style.display = 'flex'; 
+        document.getElementById('popup2004-overlay').style.setProperty('display', 'flex', 'important');
         this.updateTimerDisplay();
     },
 
@@ -236,8 +263,7 @@ var popup2004 = {
     saveState: function() { localStorage.setItem(this.storageKey, JSON.stringify({cooldownEnd: this.cooldownEnd})); },
     updateTimerDisplay: function() { 
         const timerText = document.getElementById('popup2004-timer');
-        if(this.timerRunning) timerText.textContent = 'Time remaining: ' + Math.max(0, this.secondsLeft) + 's';
-        else timerText.textContent = 'Click On Below Button';
+        timerText.textContent = this.timerRunning ? 'Remaining: ' + this.secondsLeft + 's' : 'Click On Below Button';
     }
 };
 
