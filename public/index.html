@@ -55,12 +55,11 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 .thumb-card img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: 0.3s; }
 .thumb-card img.loaded { opacity: 1; }
 
-/* Static Skeleton (No Animation) */
+/* Skeleton (Animation Removed) */
 .skeleton { background: #1a1a1a; border-radius: var(--radius); }
 
-/* No Result Style */
-.no-results { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; background: var(--glass); border-radius: var(--radius); border: 1px dashed #333; color: #888; text-align: center; margin-top: 20px; }
-.no-results span { font-size: 30px; margin-bottom: 10px; opacity: 0.5; }
+/* No Result found style */
+.not-found-msg { grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: #555; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
 
 /* Modal */
 #post-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); }
@@ -289,10 +288,10 @@ $('#search-input').on('input', function() {
         searchTimer = setTimeout(() => {
             $.getJSON(`${config.feedApi}?q=${q}&max-results=9`, (data) => {
                 if (data && data.feed && data.feed.entry) {
-                   $('#search-results').html(data.feed.entry.slice(0, 9).map(e => createCard(e)).join(''));
-                } else {
-                   $('#search-results').html(`<div class="no-results"><span>&#128269;</span>Oops! Nothing found for "${q}"<br/>Try a different keyword</div>`);
-                }
+                    $('#search-results').html(data.feed.entry.slice(0, 9).map(e => createCard(e)).join(''));
+                } else {
+                    $('#search-results').html('<div class="not-found-msg">No Results Found</div>');
+                }
             });
         }, 400);
     } else { $('#search-overlay').hide(); $('body').removeClass('search-open'); }
