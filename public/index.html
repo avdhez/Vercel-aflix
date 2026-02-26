@@ -70,10 +70,10 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
   <div id='popup2004-overlay'>
     <div class='popup-card'>
       <h2 style='color:var(--primary); font-size:22px; margin-bottom:10px; font-weight:900;'>Verification</h2>
-      <p id='popup-status-text' style='color:#888; margin-bottom:15px; font-size: 13px;'>Click "OPEN AD" and stay on that tab for 20 seconds. Comedy back and you will get 1 hour of adfree access to this site</p>
-      <span id="popup2004-timer"> Click On Below Button</span>
+      <p id='popup-status-text' style='color:#888; margin-bottom:15px; font-size: 13px;'>Click "OPEN AD" and stay on that tab for 20 seconds. Come back and you will get 1 hour of ad-free access.</p>
+      <span id="popup2004-timer">Click On Below Button</span>
       <button class='gen-btn' id='popup2004-link'>OPEN AD</button>
-      <div id="popup2004-message">Timer Reset! You Came To Early! Go back and Stay on that page For 20 seconds.</div>
+      <div id="popup2004-message">Timer Reset! You came back too early! Go back and stay on that page for 20 seconds.</div>
     </div>
   </div>
 
@@ -128,21 +128,25 @@ const config = {
     oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" 
 };
 
-/* --- POWERFUL AUTO-VERIFY POPUP --- */
+/* --- ENHANCED AUTO-VERIFY POPUP --- */
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
-    externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null,
+    externalUrl: 'https://otieu.com/4/9515846', cooldownEnd: null, isTabOpen: false,
     init: function() {
       this.restoreState();
       this.setupElements();
-      // Detect tab switching or loss of focus
-      document.addEventListener('visibilitychange', this.securityReset.bind(this));
-      window.addEventListener('blur', this.securityReset.bind(this));
+      // Only reset if user returns to THIS tab while timer is running
+      document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') this.securityCheck();
+      });
       this.checkShouldShow();
     },
     setupElements: function() {
       var p = this;
-      document.getElementById('popup2004-link').addEventListener('click', function(e) { e.preventDefault(); p.handleLinkClick(); });
+      document.getElementById('popup2004-link').addEventListener('click', function(e) { 
+          e.preventDefault(); 
+          p.handleLinkClick(); 
+      });
     },
     checkShouldShow: function() {
       if (this.cooldownEnd && Date.now() < this.cooldownEnd) this.grantAccess();
@@ -150,26 +154,29 @@ var popup2004 = {
     },
     handleLinkClick: function() { 
         window.open(this.externalUrl, '_blank'); 
+        this.isTabOpen = true;
         this.startTimer(); 
     },
     startTimer: function() {
       var p = this; p.timerRunning = true; p.secondsLeft = 20;
       document.getElementById('popup2004-message').style.display = 'none';
-      document.getElementById('popup2004-link').innerText = "Verifying...";
+      document.getElementById('popup2004-link').innerText = "STAY ON AD PAGE...";
       document.getElementById('popup2004-link').disabled = true;
       if(p.timer) clearInterval(p.timer);
       p.timer = setInterval(function() {
-        p.secondsLeft--; p.updateTimerDisplay();
+        p.secondsLeft--; 
+        p.updateTimerDisplay();
         if (p.secondsLeft <= 0) p.completeTask();
       }, 1000);
     },
-    securityReset: function() {
-      if (this.timerRunning) {
+    securityCheck: function() {
+      // If they come back while timer is still running, they failed.
+      if (this.timerRunning && this.secondsLeft > 0) {
          clearInterval(this.timer); 
          this.timerRunning = false; 
          this.secondsLeft = 20; 
          document.getElementById('popup2004-message').style.display = 'block';
-         document.getElementById('popup2004-link').innerText = "Unlock Access";
+         document.getElementById('popup2004-link').innerText = "Try Again";
          document.getElementById('popup2004-link').disabled = false;
          this.updateTimerDisplay();
       }
@@ -179,7 +186,7 @@ var popup2004 = {
       this.timerRunning = false;
       this.cooldownEnd = Date.now() + (60 * 60 * 1000); 
       this.saveState();
-      this.grantAccess(); // AUTO-CLOSE
+      this.grantAccess();
     },
     grantAccess: function() {
         document.getElementById('popup2004-overlay').style.display = 'none';
@@ -194,7 +201,7 @@ var popup2004 = {
 };
 
 // <![CDATA[
-/* --- EXACT ORIGINAL LOGICS REMAINING SAME --- */
+/* --- ORIGINAL LOGICS --- */
 let linkStore = new Map(), currentId = "", searchTimer;
 
 function getSmartThumb(url) { if (!url) return ''; return url.replace(/\/s\d+(-c)?\//, `/w400/`).replace(/=s\d+(-c)?/, `=w400`); }
