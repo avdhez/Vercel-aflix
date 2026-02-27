@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
     // 1. YOUR PRIVATE BLOGGER URL
-    const BLOG_URL = "https://bsiw729rj38e9.blogspot.com"; 
+    const BLOG_URL = "https://bsjeuw829471hd.blogspot.com"; 
 
 
     const { q, label, maxResults = 15 } = req.query;
