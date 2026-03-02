@@ -197,7 +197,6 @@ var popup2004 = {
             if (document.visibilityState === 'visible') this.securityReset();
         });
 
-        // Check every 10 seconds for expiration
         setInterval(() => this.updateBadge(), 10000);
     },
 
@@ -228,9 +227,9 @@ var popup2004 = {
         this.timerRunning = true; this.secondsLeft = 20;
         document.getElementById('popup2004-message').style.display = 'none';
         const btn = document.getElementById('popup2004-link');
-        btn.innerText = "STAY ON AD..."; btn.disabled = true;
+        btn.disabled = true;
         this.timer = setInterval(() => {
-            this.secondsLeft--; this.updateTimerDisplay();
+            this.secondsLeft--;
             if (this.secondsLeft <= 0) this.completeTask();
         }, 1000);
     },
@@ -240,8 +239,7 @@ var popup2004 = {
             clearInterval(this.timer); this.timerRunning = false; this.secondsLeft = 20; 
             document.getElementById('popup2004-message').style.display = 'block';
             const btn = document.getElementById('popup2004-link');
-            btn.innerText = "UNLOCK ACCESS"; btn.disabled = false;
-            this.updateTimerDisplay();
+            btn.disabled = false;
         }
     },
 
@@ -262,23 +260,16 @@ var popup2004 = {
     showPopup: function() { 
         document.body.className = 'unverified'; 
         $('#search-input').prop('disabled', true);
-        this.updateTimerDisplay(); 
     },
 
     restoreState: function() { try { var d = JSON.parse(localStorage.getItem(this.storageKey)); if (d) this.cooldownEnd = d.cooldownEnd; } catch (e) {} },
     saveState: function() { localStorage.setItem(this.storageKey, JSON.stringify({cooldownEnd: this.cooldownEnd})); },
-    
-    updateTimerDisplay: function() { 
-        // Keep it simple as requested
-        document.getElementById('popup2004-timer').textContent = this.timerRunning ? 'Verifying...' : 'Click On Below Button'; 
-    },
 
     updateBadge: function() {
         if(this.isVerified()) {
             let left = Math.round((this.cooldownEnd - Date.now()) / 60000);
             $('#status-badge').text(left + 'M LEFT').show();
         } else {
-            // IF TIME IS OVER: Trigger popup again
             if (document.body.className === 'verified') {
                 this.showPopup();
             }
