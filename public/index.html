@@ -217,17 +217,15 @@ var popup2004 = {
 
     setupElements: function() {
         document.getElementById('popup2004-link').addEventListener('click', () => { 
-            if(this.timerRunning) return;
+            // Link stays clickable even if timer is running
             window.open(this.externalUrl, '_blank'); 
-            this.startTimer(); 
+            if(!this.timerRunning) this.startTimer(); 
         });
     },
 
     startTimer: function() {
         this.timerRunning = true; this.secondsLeft = 20;
         document.getElementById('popup2004-message').style.display = 'none';
-        const btn = document.getElementById('popup2004-link');
-        btn.disabled = true;
         this.timer = setInterval(() => {
             this.secondsLeft--;
             if (this.secondsLeft <= 0) this.completeTask();
@@ -238,8 +236,6 @@ var popup2004 = {
         if (this.timerRunning && this.secondsLeft > 0) {
             clearInterval(this.timer); this.timerRunning = false; this.secondsLeft = 20; 
             document.getElementById('popup2004-message').style.display = 'block';
-            const btn = document.getElementById('popup2004-link');
-            btn.disabled = false;
         }
     },
 
