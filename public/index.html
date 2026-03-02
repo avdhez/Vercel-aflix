@@ -23,7 +23,6 @@ nav, #home-wrap, #popup2004-overlay { display: none !important; }
 /* --- 2. THE DESIGN LOGICS --- */
 :root { --primary: #e50914; --bg: #050505; --glass: rgba(255, 255, 255, 0.08); --radius: 8px; }
 
-
 * {
     -webkit-touch-callout: none !important;
     -webkit-user-select: none !important;
@@ -33,18 +32,13 @@ nav, #home-wrap, #popup2004-overlay { display: none !important; }
     user-select: none !important;
     -webkit-user-drag: none !important;
     -webkit-tap-highlight-color: transparent !important;
-margin:0; padding:0; box-sizing:border-box;
+    margin:0; padding:0; box-sizing:border-box;
 }
 
-/* But allow clicks on links and buttons */
 a, button, [onclick] {
     pointer-events: auto !important;
     cursor: pointer !important;
 }
-
-
-
-
 
 body { background: var(--bg); color: #fff; font-family: 'Jost'; margin: 0; padding-top: 55px; overflow-x: hidden; font-size: 13px; font-weight: 600; }
 body.search-open, body.modal-open { overflow: hidden !important; }
@@ -80,7 +74,7 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 @keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
 .skeleton { background: #111; background-repeat: no-repeat; background-size: 800px 100%;  border-radius: var(--radius); }
 
-/* Custom: No Result Message (Matches your font logic) */
+/* Custom: No Result Message */
 .no-res-msg { grid-column: 1/-1; text-align: center; padding: 50px 0; color: #444; font-size: 14px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; }
 
 /* Modal */
@@ -179,18 +173,18 @@ nav { position: fixed; top: 0; width: 100%; height: 60px; background: black; dis
 <script type='text/javascript'>
 const config = { feedApi: "/api/feed", newDomain: "fi10.bot-hosting.net:22129", newProtocol: "http:", oldDomain: "painful-elisabeth-asiantpur-8d92d39b.koyeb.app" };
 
-/* --- VERIFICATION SYSTEM (EXACT ORIGINAL) --- */
+/* --- VERIFICATION SYSTEM --- */
 var popup2004 = {
     timer: null, secondsLeft: 20, timerRunning: false, storageKey: 'aflix_access_popup',
     externalUrl: 'https://omg10.com/4/9722259', cooldownEnd: null,
-    
+
     isVerified: function() { return this.cooldownEnd && Date.now() < this.cooldownEnd; },
 
     init: async function() {
         this.restoreState();
         this.setupElements();
         this.updateBadge();
-        
+
         if (this.isVerified()) {
             this.grantAccess();
         } else {
@@ -198,11 +192,12 @@ var popup2004 = {
             if (isBlocked) this.showAdblockNotice();
             else this.showPopup();
         }
-        
+
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') this.securityReset();
         });
-        
+
+        // Check every 10 seconds for expiration
         setInterval(() => this.updateBadge(), 10000);
     },
 
@@ -264,15 +259,30 @@ var popup2004 = {
         this.updateBadge();
     },
 
-    showPopup: function() { document.body.className = 'unverified'; this.updateTimerDisplay(); },
+    showPopup: function() { 
+        document.body.className = 'unverified'; 
+        $('#search-input').prop('disabled', true);
+        this.updateTimerDisplay(); 
+    },
+
     restoreState: function() { try { var d = JSON.parse(localStorage.getItem(this.storageKey)); if (d) this.cooldownEnd = d.cooldownEnd; } catch (e) {} },
     saveState: function() { localStorage.setItem(this.storageKey, JSON.stringify({cooldownEnd: this.cooldownEnd})); },
-    updateTimerDisplay: function() { document.getElementById('popup2004-timer').textContent = this.timerRunning ? 'Remaining: ' + this.secondsLeft + 's' : 'Click On Below Button'; },
     
+    updateTimerDisplay: function() { 
+        // Keep it simple as requested
+        document.getElementById('popup2004-timer').textContent = this.timerRunning ? 'Verifying...' : 'Click On Below Button'; 
+    },
+
     updateBadge: function() {
         if(this.isVerified()) {
             let left = Math.round((this.cooldownEnd - Date.now()) / 60000);
             $('#status-badge').text(left + 'M LEFT').show();
+        } else {
+            // IF TIME IS OVER: Trigger popup again
+            if (document.body.className === 'verified') {
+                this.showPopup();
+            }
+            $('#status-badge').hide();
         }
     }
 };
@@ -322,14 +332,13 @@ $('#search-input').on('input', function() {
 function openModal(encCont, thumb, encTitle, tags, id) {
     currentId = id;
     let fullTitle = decodeURIComponent(encTitle);
-    
     let name = fullTitle.split(/(?=\s\d{4})|(?=\sWEBRip)|(?=\sCamrip)|(?=\sCAMRip)|(?=\sWEBDL)|(?=\sBluRay)|(?=\sHEVC)/)[0].trim();
     let langsMatch = fullTitle.match(/\[(.*?)\]/), subsMatch = fullTitle.match(/ESubs/i);
     let rawLangs = langsMatch ? langsMatch[1] : "Multi";
     const langMap = { 'hindi': 'Hin', 'english': 'Eng', 'japanese': 'Jap', 'korean': 'Kor', 'tamil': 'Tam', 'telugu': 'Tel', 'chinese': 'Chi', 'spanish': 'Spa','indonesian':'Ido', 'french': 'Fre','german':'Ger' };
     let codes = rawLangs.split(/\s*\+\s*|\s*,\s*|\s*\|\s*/).map(l => { let clean = l.trim().toLowerCase(); return langMap[clean] || (l.length > 3 ? l.substring(0,3) : l); }).join(' + ');
     let subs = subsMatch ? "Yes" : "No";
-    
+
     let cont = decodeURIComponent(encCont), $html = $('<div>').append($.parseHTML(cont));
     let seasonNames = []; $html.find('option').each(function() { seasonNames.push($(this).text().trim()); });
     $html.find('h2,button, a, script, style,option,select').remove();
